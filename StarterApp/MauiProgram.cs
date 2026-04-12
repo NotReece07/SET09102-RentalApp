@@ -4,6 +4,8 @@ using StarterApp.Database.Data;
 using StarterApp.Views;
 using System.Diagnostics;
 using StarterApp.Services;
+using StarterApp.Database.Data.Repositories;
+using StarterApp.Database.Models;
 
 namespace StarterApp;
 
@@ -20,6 +22,8 @@ public static class MauiProgram
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
             });
 
+        builder.Services.AddDbContext<AppDbContext>(); // registered outside the auth toggle because ItemRepository still needs AppDbContext even when authentication is using the shared API
+
         const bool useSharedApi = true;
 
         if (useSharedApi)
@@ -33,17 +37,20 @@ public static class MauiProgram
         }
         else
         {
-            builder.Services.AddDbContext<AppDbContext>();
             builder.Services.AddSingleton<IAuthenticationService, LocalAuthenticationService>();
         }
 
-        builder.Services.AddSingleton<INavigationService, NavigationService>();
+        builder.Services.AddScoped<IItemRepository, ItemRepository>(); //AddScoped = create one instance per scope. Reuse it within the current scope, but not forever like a singleton
+        builder.Services.AddTransient<ItemsListViewModel>();
+        builder.Services.AddTransient<ItemsListPage>();
+
+        builder.Services.AddSingleton<INavigationService, NavigationService>(); //AddSingleton = create one instance and keep reusing it for the whole app
 
         builder.Services.AddSingleton<AppShellViewModel>();
         builder.Services.AddSingleton<AppShell>();
         builder.Services.AddSingleton<App>();
 
-        builder.Services.AddTransient<MainViewModel>();
+        builder.Services.AddTransient<MainViewModel>(); //AddTransient = create a new instance every time its requested
         builder.Services.AddTransient<MainPage>();
         builder.Services.AddSingleton<LoginViewModel>();
         builder.Services.AddTransient<LoginPage>();
