@@ -5,7 +5,7 @@ using BCrypt.Net;
 
 namespace StarterApp.Services;
 
-public class AuthenticationService : IAuthenticationService
+public class LocalAuthenticationService : IAuthenticationService
 {
     private readonly AppDbContext _context;
     private User? _currentUser;
@@ -13,7 +13,7 @@ public class AuthenticationService : IAuthenticationService
 
     public event EventHandler<bool>? AuthenticationStateChanged;
 
-    public AuthenticationService(AppDbContext context)
+    public LocalAuthenticationService(AppDbContext context)
     {
         _context = context;
     }
