@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="StarterApp.Views.ItemDetailPage"
+             Title="Item Details">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="12">
+
+            <!-- Label = A text display -->
+            <Label Text="Item Details"
+                   FontSize="24"
+                   FontAttributes="Bold" />
+
+            <Label Text="{Binding Item.Title}"
+                   FontSize="20"
+                   FontAttributes="Bold" />
+
+            <Label Text="{Binding Item.Description}" />
+
+            <Label Text="{Binding Item.Category}" />
+
+            <Label Text="{Binding Item.DailyRate, StringFormat='£{0:F2} per day'}" /> <!-- Formats the price as pounds with 2 decimal places -->
+
+            <Label Text="{Binding Item.LocationName}" />
+
+            <Label Text="{Binding StatusMessage}"
+                   TextColor="Red" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

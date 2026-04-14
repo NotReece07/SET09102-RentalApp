@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="StarterApp.Views.CreateItemPage"
+             Title="Create Item">
+
+       <!-- Button on this page runs "CreateItemCommand" from [RelayCommand] on "CreateItemAsync()"--> 
+    <ScrollView> 
+        <VerticalStackLayout Padding="20" Spacing="12"> 
+
+              <!-- Label = A text display -->
+            <Label Text="Create New Item"
+                   FontSize="24"
+                   FontAttributes="Bold" />
+
+              <!-- Entry = Single line text input box -->
+            <Entry Placeholder="Title"
+                   Text="{Binding Title}" />
+
+              <!-- Editor: Multi-line text input box -->
+              <!-- Audosize changes height of editor based on the amount of text -->
+            <Editor Placeholder="Description"
+                    AutoSize="TextChanges" 
+                    HeightRequest="100"
+                    Text="{Binding Description}" />
+
+            <Entry Placeholder="Daily Rate"
+                   Keyboard="Numeric"
+                   Text="{Binding DailyRate}" />
+
+            <Entry Placeholder="Category"
+                   Text="{Binding Category}" />
+
+            <Entry Placeholder="Location Name"
+                   Text="{Binding LocationName}" /> <!-- Binding LocationName = get/set that text from the ViewModel property called "LocationName" -->
+
+            <Entry Placeholder="Latitude"
+                   Keyboard="Numeric"
+                   Text="{Binding Latitude}" />
+
+            <Entry Placeholder="Longitude"
+                   Keyboard="Numeric"
+                   Text="{Binding Longitude}" />
+
+            <Button Text="Create Item"
+                    Command="{Binding CreateItemCommand}" />
+
+            <Label Text="{Binding StatusMessage}"
+                   TextColor="Green" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

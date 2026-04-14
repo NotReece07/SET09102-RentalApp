@@ -51,7 +51,7 @@ public partial class CreateItemViewModel : ObservableObject
                 Title = Title, //Creates a new item and fills it with the values currently in ViewModel (Empty)
                 Description = Description,
                 DailyRate = DailyRate,
-                Categotry = Category,
+                Category = Category,
                 LocationName = LocationName,
                 Latitude = Latitude,
                 Longitude = Longitude,
