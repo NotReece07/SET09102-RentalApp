@@ -15,6 +15,9 @@ public partial class ItemsListViewModel : ObservableObject
     [ObservableProperty] //creates a public property, notifies the UI when the value changes
     private ObservableCollection<Item> items = new();
 
+    [ObservableProperty]
+    private Item? selectedItem;
+
     public ItemsListViewModel(IItemRepository itemRepository)
     {
         _itemRepository = itemRepository;
@@ -24,6 +27,15 @@ public partial class ItemsListViewModel : ObservableObject
     private async Task LoadItemsAsync()
     {
         var allItems = await _itemRepository.GetAllAsync(); //ask repository for all items, store the results in allItems
-        items = new ObservableCollection<Item>(allItems); //take the list that came back, turn it into an Observable collection, store it in the viewmodels items collection so the UI can use it
+        Items = new ObservableCollection<Item>(allItems); //take the list that came back, turn it into an Observable collection, store it in the viewmodels items collection so the UI can use it
+    }
+
+    [RelayCommand]
+    private void SelectItem(Item? item)
+    {
+        if (item==null)
+        return;
+
+        SelectedItem = item;
     }
 }

@@ -54,7 +54,7 @@ public partial class EditItemViewModel : ObservableObject // EditItemViewModel =
             }
 
             // These load the items titlte into the ViewModels editable Title property.
-            // After loading. The user sees the current values AND the user can edit them
+            // After loading, The user sees the current values AND the user can edit them
             Title = _currentItem.Title;
             Description = _currentItem.Description;
             DailyRate = _currentItem.DailyRate;

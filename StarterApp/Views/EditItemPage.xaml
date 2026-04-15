@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="StarterApp.Views.EditItemPage"
+             Title="Edit Item">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="12">
+
+            <Label Text="Edit Item"
+                   FontSize="24"
+                   FontAttributes="Bold" />
+
+            <Entry Placeholder="Title"
+                   Text="{Binding Title}" />
+
+            <Editor Placeholder="Description"
+                    AutoSize="TextChanges"
+                    HeightRequest="100"
+                    Text="{Binding Description}" />
+
+            <Entry Placeholder="Daily Rate"
+                   Keyboard="Numeric"
+                   Text="{Binding DailyRate}" />
+
+            <Entry Placeholder="Category"
+                   Text="{Binding Category}" />
+
+            <Entry Placeholder="Location Name"
+                   Text="{Binding LocationName}" />
+
+            <Entry Placeholder="Latitude"
+                   Keyboard="Numeric"
+                   Text="{Binding Latitude}" />
+
+            <Entry Placeholder="Longitude"
+                   Keyboard="Numeric"
+                   Text="{Binding Longitude}" />
+
+            <!--This button runs UpdateItemCommand from EditItemViewModel, the RelayCommand part-->
+            <Button Text="Update Item"
+                    Command="{Binding UpdateItemCommand}" />
+
+            <Label Text="{Binding StatusMessage}"
+                   TextColor="Green" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

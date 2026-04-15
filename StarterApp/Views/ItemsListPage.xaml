@@ -12,8 +12,17 @@
         <CollectionView ItemsSource="{Binding Items}">
             <CollectionView.ItemTemplate>
                 <DataTemplate>
-                    <Frame Padding="10" Margin="0,5" BorderColor="LightGray">
-                        <VerticalStackLayout Spacing="5">
+                    <Frame Padding="10"
+                           Margin="0,5"
+                           BorderColor="LightGray"
+                           BackgroundColor="White">
+                           <!-- Below code makes the entire card responsible for handling the tap directly -->
+                        <Frame.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnItemTapped" />
+                        </Frame.GestureRecognizers>
+
+                        <VerticalStackLayout Spacing="5"
+                                             InputTransparent="True">
                             <Label Text="{Binding Title}"
                                    FontSize="18"
                                    FontAttributes="Bold" />

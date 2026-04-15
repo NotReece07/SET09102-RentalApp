@@ -75,7 +75,7 @@ public partial class CreateItemViewModel : ObservableObject
         }
         catch (Exception ex) // If something fails, this stores an error message
         {
-            StatusMessage = $"Error: {ex.Message}";
+            StatusMessage = $"Error: {ex}";
         }
     }
 }

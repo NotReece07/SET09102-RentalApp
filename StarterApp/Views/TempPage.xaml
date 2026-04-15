@@ -9,11 +9,24 @@
         <vm:TempViewModel />
     </ContentPage.BindingContext>
 
-    <VerticalStackLayout>
-        <Label 
-            Text="{Binding Message}"
-            FontSize="24"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
-    </VerticalStackLayout>
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="12">
+            <Label 
+                Text="{Binding Message}"
+                FontSize="24"
+                HorizontalOptions="Center" />
+
+            <Button Text="Open Items List"
+                    Clicked="OnOpenItemsListClicked" />
+
+            <Button Text="Open Create Item"
+                    Clicked="OnOpenCreateItemClicked" />
+
+            <Button Text="Open Item Detail"
+                    Clicked="OnOpenItemDetailClicked" />
+
+            <Button Text="Open Edit Item"
+                    Clicked="OnOpenEditItemClicked" />
+        </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>

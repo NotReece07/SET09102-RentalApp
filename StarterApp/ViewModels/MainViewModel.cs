@@ -146,4 +146,22 @@ public partial class MainViewModel : BaseViewModel
             IsBusy = false;
         }
     }
+
+    [RelayCommand]
+    private async Task NavigateToItemsListAsync()
+    {
+        await _navigationService.NavigateToAsync("ItemsListPage");
+    }
+
+    [RelayCommand]
+    private async Task NavigateToCreateItemAsync()
+    {
+        await _navigationService.NavigateToAsync("CreateItemPage");
+    }
+
+    [RelayCommand]
+    private async Task NavigateToRentalsAsync()
+    {
+        await _navigationService.NavigateToAsync("TempPage");
+    }
 }

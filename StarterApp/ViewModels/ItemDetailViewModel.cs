@@ -21,13 +21,13 @@ public partial class ItemDetailViewModel : ObservableObject // inherits MVVM sup
     }
 
     [RelayCommand] // Turns the method below into a command the UI can call.bind to in MVVM
-    private async Task LoadItemAsync(int id)
+    public async Task LoadItemFromIdAsync(int id)
     {
         try // if something goes wrong, execution moves to catch rather than crashing
         {
-            item = await _itemRepository.GetByIdAsync(id); //calls the repo, asks for the item with this id, wait for the database call to finish and store the results in the item property
+            Item = await _itemRepository.GetByIdAsync(id); //calls the repo, asks for the item with this id, wait for the database call to finish and store the results in the item property
 
-            if (item == null)
+            if (Item == null)
             {
                 StatusMessage = "Item not found.";
             }
@@ -40,5 +40,11 @@ public partial class ItemDetailViewModel : ObservableObject // inherits MVVM sup
         {
             StatusMessage = $"Error: {ex.Message}";
         }
+    }
+
+    [RelayCommand]
+    private async Task LoadItemAsync(int id)
+    {
+        await LoadItemFromIdAsync(id);
     }
 }

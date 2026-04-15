@@ -5,10 +5,6 @@
              xmlns:vm="clr-namespace:StarterApp.ViewModels"
              Title="{Binding Title}">
 
-    <ContentPage.BindingContext>
-        <vm:MainViewModel />
-    </ContentPage.BindingContext>
-
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="Profile" 
                      Command="{Binding NavigateToProfileCommand}"
@@ -123,6 +119,107 @@
                                    TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray600}}" />
                         </Grid>
                     </Border>
+
+                    <!-- Browse Items Card -->
+                    <Border BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}"
+                            Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray700}}"
+                            StrokeThickness="1"
+                            Padding="20"
+                            HeightRequest="80">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="12" />
+                        </Border.StrokeShape>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding NavigateToItemsListCommand}" />
+                        </Border.GestureRecognizers>
+                        <Grid ColumnDefinitions="Auto,*,Auto">
+                            <Label Grid.Column="0"
+                                Text="📦"
+                                FontSize="24"
+                                VerticalOptions="Center" />
+                            <StackLayout Grid.Column="1" Margin="15,0,0,0" VerticalOptions="Center">
+                                <Label Text="Browse Items"
+                                    FontSize="16"
+                                    FontAttributes="Bold" />
+                                <Label Text="View all available items"
+                                    FontSize="12"
+                                    TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray400}}" />
+                            </StackLayout>
+                            <Label Grid.Column="2"
+                                Text=">"
+                                FontSize="18"
+                                VerticalOptions="Center"
+                                TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray600}}" />
+                        </Grid>
+                    </Border>
+
+                    <!-- Create Item Card -->
+                    <Border BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}"
+                            Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray700}}"
+                            StrokeThickness="1"
+                            Padding="20"
+                            HeightRequest="80">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="12" />
+                        </Border.StrokeShape>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding NavigateToCreateItemCommand}" />
+                        </Border.GestureRecognizers>
+                        <Grid ColumnDefinitions="Auto,*,Auto">
+                            <Label Grid.Column="0"
+                                Text="➕"
+                                FontSize="24"
+                                VerticalOptions="Center" />
+                            <StackLayout Grid.Column="1" Margin="15,0,0,0" VerticalOptions="Center">
+                                <Label Text="Create Item"
+                                    FontSize="16"
+                                    FontAttributes="Bold" />
+                                <Label Text="List a new item for rent"
+                                    FontSize="12"
+                                    TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray400}}" />
+                            </StackLayout>
+                            <Label Grid.Column="2"
+                                Text=">"
+                                FontSize="18"
+                                VerticalOptions="Center"
+                                TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray600}}" />
+                        </Grid>
+                    </Border>
+
+                    <!-- Rentals Card -->
+                    <Border BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}"
+                            Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray700}}"
+                            StrokeThickness="1"
+                            Padding="20"
+                            HeightRequest="80">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="12" />
+                        </Border.StrokeShape>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding NavigateToRentalsCommand}" />
+                        </Border.GestureRecognizers>
+                        <Grid ColumnDefinitions="Auto,*,Auto">
+                            <Label Grid.Column="0"
+                                Text="📅"
+                                FontSize="24"
+                                VerticalOptions="Center" />
+                            <StackLayout Grid.Column="1" Margin="15,0,0,0" VerticalOptions="Center">
+                                <Label Text="My Rentals"
+                                    FontSize="16"
+                                    FontAttributes="Bold" />
+                                <Label Text="View rental requests and activity"
+                                    FontSize="12"
+                                    TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray400}}" />
+                            </StackLayout>
+                            <Label Grid.Column="2"
+                                Text=">"
+                                FontSize="18"
+                                VerticalOptions="Center"
+                                TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray600}}" />
+                        </Grid>
+                    </Border>
+
+
 
                     <!-- Settings Card -->
                     <Border BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}"
