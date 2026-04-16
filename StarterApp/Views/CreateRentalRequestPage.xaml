@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="StarterApp.Views.CreateRentalRequestPage"
+             Title="Request Rental">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="12">
+
+            <Label Text="Create Rental Request"
+                   FontSize="24"
+                   FontAttributes="Bold" />
+
+            <Label Text="{Binding ItemId, StringFormat='Item ID: {0}'}" />
+            <Label Text="{Binding BorrowerId, StringFormat='Borrower ID: {0}'}" />
+
+            <DatePicker Date="{Binding StartDate}" />
+            <DatePicker Date="{Binding EndDate}" />
+
+            <Button Text="Submit Rental Request"
+                    Command="{Binding CreateRentalRequestCommand}" />
+
+            <Label Text="{Binding StatusMessage}"
+                   TextColor="Green" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

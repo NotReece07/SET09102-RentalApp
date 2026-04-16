@@ -8,6 +8,7 @@ public interface IAuthenticationService
     
     bool IsAuthenticated { get; }
     User? CurrentUser { get; }
+    int CurrentLocalUserId { get; } // stores the ID of the matching local database user
     List<string> CurrentUserRoles { get; }
     
     Task<AuthenticationResult> LoginAsync(string email, string password);

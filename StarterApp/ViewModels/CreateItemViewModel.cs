@@ -1,8 +1,8 @@
-using System.Net.ServerSentEvents;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StarterApp.Database.Data.Repositories;
 using StarterApp.Database.Models;
+using StarterApp.Services;
 
 namespace StarterApp.ViewModels;
 
@@ -34,9 +34,13 @@ public partial class CreateItemViewModel : ObservableObject
     [ObservableProperty]
     private string statusMessage = string.Empty;
 
-    public CreateItemViewModel(IItemRepository itemRepository)
+    private readonly IAuthenticationService _authService; // stores the auth service so the ViewModel can get the logged-in user's local database ID
+    
+    // Constructor
+    public CreateItemViewModel(IItemRepository itemRepository, IAuthenticationService authService)
     {
-        _itemRepository = itemRepository;
+        _itemRepository = itemRepository; // stores the item repository so it can be used through the whole class
+        _authService = authService; // stores the auth service so the ViewModel can access the logged-in user's local database ID
     }
 
     [RelayCommand] // Automatically turns the method below into a comand the UI can call or bind
@@ -56,8 +60,7 @@ public partial class CreateItemViewModel : ObservableObject
                 Latitude = Latitude,
                 Longitude = Longitude,
 
-                // Temporary value for now until I connect real logged-in user ownership
-                OwnerId = 1
+                OwnerId = _authService.CurrentLocalUserId
             };
 
             await _itemRepository.CreateAsync(item); //Sends that item to the repository to save it in the database

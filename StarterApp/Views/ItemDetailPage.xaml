@@ -12,6 +12,9 @@
                    FontSize="24"
                    FontAttributes="Bold" />
 
+             <Button Text="Request Rental"
+                   Clicked="OnRequestRentalClicked" />
+
             <Label Text="{Binding Item.Title}"
                    FontSize="20"
                    FontAttributes="Bold" />

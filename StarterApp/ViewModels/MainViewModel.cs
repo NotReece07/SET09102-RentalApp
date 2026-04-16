@@ -162,6 +162,6 @@ public partial class MainViewModel : BaseViewModel
     [RelayCommand]
     private async Task NavigateToRentalsAsync()
     {
-        await _navigationService.NavigateToAsync("TempPage");
+        await _navigationService.NavigateToAsync("CreateRentalRequestPage");
     }
 }

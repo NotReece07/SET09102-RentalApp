@@ -23,6 +23,7 @@ public class LocalAuthenticationService : IAuthenticationService
     public User? CurrentUser => _currentUser;
 
     public List<string> CurrentUserRoles => _currentUserRoles;
+    public int CurrentLocalUserId => CurrentUser?.Id ?? 0;
 
     public async Task<AuthenticationResult> LoginAsync(string email, string password)
     {
