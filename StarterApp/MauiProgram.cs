@@ -56,7 +56,9 @@ public static class MauiProgram
         builder.Services.AddTransient<EditItemPage>();
 
         builder.Services.AddTransient<CreateRentalRequestViewModel>();
-builder.Services.AddTransient<CreateRentalRequestPage>();
+        builder.Services.AddTransient<CreateRentalRequestPage>();
+        builder.Services.AddTransient<RentalsViewModel>();
+        builder.Services.AddTransient<RentalsPage>();
 
         builder.Services.AddSingleton<INavigationService, NavigationService>(); //AddSingleton = create one instance and keep reusing it for the whole app
 

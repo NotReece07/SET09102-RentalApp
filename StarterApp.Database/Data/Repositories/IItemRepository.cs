@@ -9,6 +9,7 @@ public interface IItemRepository // public (other parts of the program can use i
 {
     Task<List<Item>> GetAllAsync(); //Task = gives back a promise that the answer will come later. Will return a <List<Item>>
     Task<Item?> GetByIdAsync(int id);
+    Task<List<Item>> GetByOwnerIdAsync(int ownerId);
     Task<Item> CreateAsync(Item item);
     Task UpdateAsync(Item item);
     Task DeleteAsync(int id);

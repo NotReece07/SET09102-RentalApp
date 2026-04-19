@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="StarterApp.Views.RentalsPage"
+             Title="My Rentals">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="15">
+
+            <Label Text="Outgoing Rental Requests"
+                   FontSize="20"
+                   FontAttributes="Bold" />
+
+            <Button Text="Load Outgoing Rentals"
+                    Command="{Binding LoadOutgoingRentalsCommand}" />
+
+            <CollectionView ItemsSource="{Binding OutgoingRentals}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Border Padding="10"
+                                Margin="0,5"
+                                Stroke="LightGray">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="8" />
+                            </Border.StrokeShape>
+
+                            <VerticalStackLayout Spacing="5">
+                                <Label Text="{Binding Item.Title}"
+                                       FontSize="18"
+                                       FontAttributes="Bold" />
+                                <Label Text="{Binding Item.Description}" />
+                                <Label Text="{Binding StartDate}" />
+                                <Label Text="{Binding EndDate}" />
+                                <Label Text="{Binding Status}" />
+                            </VerticalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <Label Text="Incoming Rental Requests"
+                   FontSize="20"
+                   FontAttributes="Bold"
+                   Margin="0,15,0,0" />
+
+            <Button Text="Load Incoming Rentals"
+                    Command="{Binding LoadIncomingRentalsCommand}" />
+
+            <CollectionView ItemsSource="{Binding IncomingRentals}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Border Padding="10"
+                                Margin="0,5"
+                                Stroke="LightGray">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="8" />
+                            </Border.StrokeShape>
+
+                            <VerticalStackLayout Spacing="5">
+                                <Label Text="{Binding Item.Title}"
+                                       FontSize="18"
+                                       FontAttributes="Bold" />
+                                <Label Text="{Binding Borrower.FullName}"
+                                       FontAttributes="Italic" />
+                                <Label Text="{Binding StartDate}" />
+                                <Label Text="{Binding EndDate}" />
+                                <Label Text="{Binding Status}" />
+                            </VerticalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <Label Text="{Binding StatusMessage}"
+                   TextColor="Green" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

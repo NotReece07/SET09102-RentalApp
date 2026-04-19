@@ -56,4 +56,12 @@ public class ItemRepository : IItemRepository //ItemRepository will follow the r
             await _context.SaveChangesAsync();
         }
     }
+
+    public async Task<List<Item>> GetByOwnerIdAsync(int ownerId)
+    {
+        return await _context.Items
+            .Include(i => i.Owner)
+            .Where(i => i.OwnerId == ownerId)
+            .ToListAsync();
+    }
 }
