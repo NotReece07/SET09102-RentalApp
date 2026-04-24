@@ -40,6 +40,7 @@ public class AppDbContext : DbContext
     public DbSet<UserRole> UserRoles { get; set; }
     public DbSet<Item> Items { get; set; } //Represents the Items table in the database (I want to store and access Item objects in the db)
     public DbSet<Rental> Rentals { get; set; } //Represents the rentals table in the databae and lets EF core store and access Rental Records
+    public DbSet<Review> Reviews { get; set; } // Represents the reviews table in the database and lets EF Core store and access Review records
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -108,6 +109,26 @@ public class AppDbContext : DbContext
             entity.HasOne(e => e.Borrower) //each rental is linked to one borrower user
                 .WithMany() //One user can make many rental requests
                 .HasForeignKey(e => e.BorrowerId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<Review>(entity =>
+        {
+            entity.Property(e => e.Comment).HasMaxLength(1000);
+
+            entity.HasOne(e => e.Rental)
+                .WithMany()
+                .HasForeignKey(e => e.RentalId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.Item)
+                .WithMany()
+                .HasForeignKey(e => e.ItemId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.Reviewer)
+                .WithMany()
+                .HasForeignKey(e => e.ReviewerId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
     }

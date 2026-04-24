@@ -164,4 +164,10 @@ public partial class MainViewModel : BaseViewModel
     {
         await _navigationService.NavigateToAsync("RentalsPage"); // opens the rentals list page instead of the rental request page
     }
+
+    [RelayCommand]
+    private async Task NavigateToCreateReviewAsync()
+    {
+        await _navigationService.NavigateToAsync(nameof(CreateReviewPage)); // opens the review creation page from the dashboard
+    }
 }

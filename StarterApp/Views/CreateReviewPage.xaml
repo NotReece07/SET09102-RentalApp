@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="StarterApp.Views.CreateReviewPage"
+             Title="Create Review">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="12">
+
+            <Label Text="Create Review"
+                   FontSize="24"
+                   FontAttributes="Bold" />
+
+            <Entry Placeholder="Rental ID"
+                   Keyboard="Numeric"
+                   Text="{Binding RentalId}" />
+
+            <Entry Placeholder="Item ID"
+                   Keyboard="Numeric"
+                   Text="{Binding ItemId}" />
+
+            <Entry Placeholder="Rating (1-5)"
+                   Keyboard="Numeric"
+                   Text="{Binding Rating}" />
+
+            <Editor Placeholder="Write your review comment here"
+                    AutoSize="TextChanges"
+                    HeightRequest="100"
+                    Text="{Binding Comment}" />
+
+            <Button Text="Submit Review"
+                    Command="{Binding CreateReviewCommand}" />
+
+            <Label Text="{Binding StatusMessage}"
+                   TextColor="Green" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

@@ -18,16 +18,17 @@ public class ItemRepository : IItemRepository //ItemRepository will follow the r
     public async Task<List<Item>> GetAllAsync()
     {
         return await _context.Items
-            .Include(i => i.Owner) // loads the related owner user
+            .AsNoTracking() // Tells EF Core to fetch fresh read-only data instead of using tracked cached entities
+            .Include(i => i.Owner)
             .ToListAsync();
     }
-
     //finds one item by its ID
     public async Task<Item?> GetByIdAsync(int id)
     {
         return await _context.Items
+            .AsNoTracking() // tells EF Core to fetch a fresh copy of this item from the database
             .Include(i => i.Owner)
-            .FirstOrDefaultAsync(i => i.Id == id); // find the first item whose id matches the id given, if none exists then return null
+            .FirstOrDefaultAsync(i => i.Id == id);
     }
 
     //Adds a new item to the database and saves it
@@ -41,8 +42,23 @@ public class ItemRepository : IItemRepository //ItemRepository will follow the r
     //This updates an existing item and saves the change
     public async Task UpdateAsync(Item item)
     {
-        _context.Items.Update(item);
-        await _context.SaveChangesAsync();
+        var existingItem = await _context.Items.FindAsync(item.Id); // finds the tracked version of the item already in the database
+
+        if (existingItem == null)
+        {
+            throw new Exception("Item not found."); // stops the update if the item does not exist
+        }
+
+        existingItem.Title = item.Title; // copies the edited values into the tracked database item
+        existingItem.Description = item.Description;
+        existingItem.DailyRate = item.DailyRate;
+        existingItem.Category = item.Category;
+        existingItem.LocationName = item.LocationName;
+        existingItem.Latitude = item.Latitude;
+        existingItem.Longitude = item.Longitude;
+        existingItem.OwnerId = item.OwnerId;
+
+        await _context.SaveChangesAsync(); // saves the updated tracked item to the database
     }
 
     // Finds an item, deletes that item if it exists
@@ -60,6 +76,7 @@ public class ItemRepository : IItemRepository //ItemRepository will follow the r
     public async Task<List<Item>> GetByOwnerIdAsync(int ownerId)
     {
         return await _context.Items
+            .AsNoTracking() // tells EF Core to fetch fresh items from the db owned by this user instead of tracked cached ones
             .Include(i => i.Owner)
             .Where(i => i.OwnerId == ownerId)
             .ToListAsync();

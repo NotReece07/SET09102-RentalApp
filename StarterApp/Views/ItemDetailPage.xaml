@@ -7,28 +7,31 @@
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="12">
 
-            <!-- Label = A text display -->
-            <Label Text="Item Details"
+              <!-- Label = A text display -->
+              <Label Text="Item Details"
                    FontSize="24"
                    FontAttributes="Bold" />
 
-             <Button Text="Request Rental"
-                   Clicked="OnRequestRentalClicked" />
-
-            <Label Text="{Binding Item.Title}"
+              <Label Text="{Binding Item.Title}"
                    FontSize="20"
                    FontAttributes="Bold" />
 
-            <Label Text="{Binding Item.Description}" />
+              <Label Text="{Binding Item.Description}" />
 
-            <Label Text="{Binding Item.Category}" />
+              <Label Text="{Binding Item.Category}" />
 
-            <Label Text="{Binding Item.DailyRate, StringFormat='£{0:F2} per day'}" /> <!-- Formats the price as pounds with 2 decimal places -->
+              <Label Text="{Binding Item.DailyRate, StringFormat='£{0:F2} per day'}" /> <!-- Formats the price as pounds with 2 decimal places -->
 
-            <Label Text="{Binding Item.LocationName}" />
+              <Label Text="{Binding Item.LocationName}" />
 
-            <Label Text="{Binding StatusMessage}"
-                   TextColor="Red" />
+              <Button Text="Request Rental"
+                     Clicked="OnRequestRentalClicked" />
+
+              <Button Text="Edit Item"
+                     Clicked="OnEditItemClicked" />
+
+              <Label Text="{Binding StatusMessage}"
+                     TextColor="Red" />
 
         </VerticalStackLayout>
     </ScrollView>

@@ -1,14 +1,12 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using StarterApp.Database.Data.Repositories;
-using StarterApp.Database.Models;
 using StarterApp.Services;
 
 namespace StarterApp.ViewModels;
 
 public partial class CreateRentalRequestViewModel : ObservableObject
 {
-    private readonly IRentalRepository _rentalRepository; // creates a privately stored repository field. IRentalRepo = type, _rentalRepository = variable name
+    private readonly IRentalService _rentalService; // stores the rental service so the ViewModel can create rentals through business rules
     private readonly IAuthenticationService _authService; // stores the authentication service so the ViewModel can get the currently logged-in user
 
     [ObservableProperty] //Generates a public property from the field below and notifies the UI when the value changes
@@ -27,9 +25,9 @@ public partial class CreateRentalRequestViewModel : ObservableObject
     private string statusMessage = string.Empty; //used to show error messages or success messages
 
     //constructor
-    public CreateRentalRequestViewModel(IRentalRepository rentalRepository, IAuthenticationService authService)
+    public CreateRentalRequestViewModel(IRentalService rentalService, IAuthenticationService authService)
     {
-        _rentalRepository = rentalRepository; // stores rentalRepository object in _rentalRepository so it can be used through the whole class
+        _rentalService = rentalService; // stores rentalService object in _rentalService so it can be used through the whole class
         _authService = authService; // stores authService object in _authService so the ViewModel can access the current user
 
         BorrowerId = _authService.CurrentLocalUserId; // uses the synced local database user ID instead of the API user ID
@@ -45,16 +43,13 @@ public partial class CreateRentalRequestViewModel : ObservableObject
     {
         try
         {
-            var rental = new Rental // creates a new rental object
-            {
-                ItemId = ItemId, // Left side = property on the new Rental, right side = value currently stored in the ViewModel
-                BorrowerId = BorrowerId, // BorrowerId comes from the logged-in user
-                StartDate = DateOnly.FromDateTime(StartDate), // converts the DatePicker DateTime into a DateOnly value
-                EndDate = DateOnly.FromDateTime(EndDate), // converts the DatePicker DateTime into a DateOnly value
-                Status = "Requested"
-            };
+            BorrowerId = _authService.CurrentLocalUserId; // refreshes the logged-in local user ID before creating the rental
 
-            await _rentalRepository.CreateAsync(rental); // Sends the new rental request to the repository to save it in the database
+            await _rentalService.RequestRentalAsync(
+                ItemId,
+                BorrowerId,
+                DateOnly.FromDateTime(StartDate), // converts the DatePicker DateTime into a DateOnly value
+                DateOnly.FromDateTime(EndDate)); // converts the DatePicker DateTime into a DateOnly value
 
             StatusMessage = "Rental request created successfully.";
 

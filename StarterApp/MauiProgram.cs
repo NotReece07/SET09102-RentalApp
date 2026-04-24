@@ -42,6 +42,8 @@ public static class MauiProgram
 
         builder.Services.AddScoped<IItemRepository, ItemRepository>(); //AddScoped = create one instance per scope. Reuse it within the current scope, but not forever like a singleton
         builder.Services.AddScoped<IRentalRepository, RentalRepository>();
+        builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
+        builder.Services.AddScoped<IRentalService, RentalService>(); // registers the rental service so ViewModels can use business logic instead of calling the repository directly
 
         builder.Services.AddTransient<ItemsListViewModel>();
         builder.Services.AddTransient<ItemsListPage>();
@@ -54,6 +56,9 @@ public static class MauiProgram
         
         builder.Services.AddTransient<EditItemViewModel>();
         builder.Services.AddTransient<EditItemPage>();
+
+        builder.Services.AddTransient<CreateReviewViewModel>();
+        builder.Services.AddTransient<CreateReviewPage>();
 
         builder.Services.AddTransient<CreateRentalRequestViewModel>();
         builder.Services.AddTransient<CreateRentalRequestPage>();

@@ -47,4 +47,12 @@ public partial class ItemDetailViewModel : ObservableObject // inherits MVVM sup
     {
         await LoadItemFromIdAsync(id);
     }
+
+    public async Task RefreshItemAsync() // reloads the current item from the database so the detail page shows the newest saved values
+{
+    if (Item == null)
+        return;
+
+    await LoadItemFromIdAsync(Item.Id); // reuses the existing load logic to refresh the current item by its ID
+}
 }

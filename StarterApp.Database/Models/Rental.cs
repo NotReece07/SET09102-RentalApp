@@ -1,9 +1,6 @@
 using Microsoft.EntityFrameworkCore; //Lets me use core atributes like PrimaryKey
 using System.ComponentModel.DataAnnotations; // Lets me use validation attributes
 using System.ComponentModel.DataAnnotations.Schema; // Lets me use database mapping attributes like Table("rentals")
-using System.Dynamic;
-using System.Net.ServerSentEvents;
-using System.Reflection.Metadata;
 
 namespace StarterApp.Database.Models;
 
@@ -24,7 +21,10 @@ public class Rental //creates the rental class
 
     [Required]
     [MaxLength(50)]
-    public string Status { get; set; } = "Requested;"; //When a new rental is created, its status starts as Requested
+    public string Status { get; set; } = "Requested"; //When a new rental is created, its status starts as Requested
+
+    [Column(TypeName = "decimal(10,2)")] // stores total rental price as a decimal with 2 digits after the decimal point
+    public decimal TotalPrice { get; set; } // stores the full price for the rental based on the daily rate and duration
 
     public DateTime? CreatedAt { get; set; } = DateTime.UtcNow; // Stores when the rental record was created, given the current time by default
     public DateTime? UpdatedAt { get; set; } = DateTime.UtcNow; // Stores when the rental record was last updated, also given the current time

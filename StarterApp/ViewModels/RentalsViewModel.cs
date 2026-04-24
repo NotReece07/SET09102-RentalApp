@@ -1,7 +1,6 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using StarterApp.Database.Data.Repositories;
 using StarterApp.Database.Models;
 using StarterApp.Services;
 
@@ -9,8 +8,7 @@ namespace StarterApp.ViewModels;
 
 public partial class RentalsViewModel : ObservableObject
 {
-    private readonly IRentalRepository _rentalRepository; // stores the rental repository so the ViewModel can load rental records from the database
-    private readonly IItemRepository _itemRepository; // stores the item repository so the ViewModel can find items owned by the current user
+    private readonly IRentalService _rentalService; // stores the rental service so the ViewModel can load rentals and apply rental workflow business rules
     private readonly IAuthenticationService _authService; // stores the auth service so the ViewModel can get the logged-in user's local database ID
 
     [ObservableProperty] // Generates a public property from the field below and notifies the UI when the value changes
@@ -23,10 +21,9 @@ public partial class RentalsViewModel : ObservableObject
     private string statusMessage = string.Empty; // used to show messages such as errors or "no rentals found"
 
     // constructor
-    public RentalsViewModel(IRentalRepository rentalRepository, IItemRepository itemRepository, IAuthenticationService authService)
+    public RentalsViewModel(IRentalService rentalService, IAuthenticationService authService)
     {
-        _rentalRepository = rentalRepository; // stores rentalRepository so it can be used through the whole class
-        _itemRepository = itemRepository; // stores itemRepository so it can be used through the whole class
+        _rentalService = rentalService; // stores rentalService so it can be used through the whole class
         _authService = authService; // stores authService so the ViewModel can get the logged-in user's local database ID
     }
 
@@ -44,7 +41,7 @@ public partial class RentalsViewModel : ObservableObject
                 return;
             }
 
-            var rentals = await _rentalRepository.GetByBorrowerIdAsync(localUserId); // gets all rentals where this user is the borrower
+            var rentals = await _rentalService.GetOutgoingRentalsAsync(localUserId); // gets all rentals where this user is the borrower through the service layer
 
             OutgoingRentals = new ObservableCollection<Rental>(rentals); // puts the rental list into an ObservableCollection so the UI can display it
 
@@ -77,17 +74,9 @@ public partial class RentalsViewModel : ObservableObject
                 return;
             }
 
-            var ownedItems = await _itemRepository.GetByOwnerIdAsync(localUserId); // gets all items owned by the current user
+            var rentals = await _rentalService.GetIncomingRentalsAsync(localUserId); // gets all rentals for items owned by the current user through the service layer
 
-            var incomingList = new List<Rental>(); // temporary list used to collect rentals for all owned items
-
-            foreach (var item in ownedItems)
-            {
-                var itemRentals = await _rentalRepository.GetByItemIdAsync(item.Id); // gets all rentals linked to this owned item
-                incomingList.AddRange(itemRentals); // adds those rentals into the combined incoming list
-            }
-
-            IncomingRentals = new ObservableCollection<Rental>(incomingList); // puts the combined incoming list into an ObservableCollection so the UI can display it
+            IncomingRentals = new ObservableCollection<Rental>(rentals); // puts the combined incoming list into an ObservableCollection so the UI can display it
 
             if (IncomingRentals.Count == 0)
             {
@@ -97,6 +86,68 @@ public partial class RentalsViewModel : ObservableObject
             {
                 StatusMessage = string.Empty;
             }
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = ex.InnerException?.Message ?? ex.Message; // stores the real error message so it can be shown on the page instead of crashing
+        }
+    }
+
+    [RelayCommand] // Turns the method below into a command the UI can bind to
+    private async Task ApproveRentalAsync(Rental? rental) // approves a selected rental request if the current user owns the related item
+    {
+        try
+        {
+            if (rental == null)
+            {
+                return; // stops the command if no rental was passed in
+            }
+
+            var localUserId = _authService.CurrentLocalUserId; // gets the logged-in owner's local database ID
+
+            if (localUserId == 0)
+            {
+                StatusMessage = "No local user found.";
+                return;
+            }
+
+            await _rentalService.ApproveRentalAsync(rental.Id, localUserId); // asks the service layer to approve the rental using business rules
+
+            StatusMessage = "Rental approved successfully.";
+
+            await LoadIncomingRentalsAsync(); // refreshes the incoming rental list after the approval
+            await LoadOutgoingRentalsAsync(); // refreshes the outgoing rental list too so the borrower-side status is updated
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = ex.InnerException?.Message ?? ex.Message; // stores the real error message so it can be shown on the page instead of crashing
+        }
+    }
+
+    [RelayCommand] // Turns the method below into a command the UI can bind to
+    private async Task RejectRentalAsync(Rental? rental) // rejects a selected rental request if the current user owns the related item
+    {
+        try
+        {
+            if (rental == null)
+            {
+                return; // stops the command if no rental was passed in
+            }
+
+            var localUserId = _authService.CurrentLocalUserId; // gets the logged-in owner's local database ID
+
+            if (localUserId == 0)
+            {
+                StatusMessage = "No local user found.";
+                return;
+            }
+
+            await _rentalService.RejectRentalAsync(rental.Id, localUserId); // asks the service layer to reject the rental using business rules
+
+            StatusMessage = "Rental rejected successfully.";
+
+            await LoadIncomingRentalsAsync(); // refreshes the incoming rental list after the rejection
+            await LoadOutgoingRentalsAsync(); // refreshes the outgoing rental list too so the borrower-side status is updated
         }
         catch (Exception ex)
         {

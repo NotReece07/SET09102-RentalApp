@@ -2,12 +2,14 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StarterApp.Database.Data.Repositories;
 using StarterApp.Database.Models;
+using StarterApp.Services;
 
 namespace StarterApp.ViewModels;
 
 public partial class EditItemViewModel : ObservableObject // EditItemViewModel = class name, ObservableObject = gives it property-change notifactions for MVVM
 {
     private readonly IItemRepository _itemRepository; //type and variable name
+    private readonly IAuthenticationService _authService; // stores the auth service so the ViewModel can check who the logged-in local user is
 
     private Item? _currentItem; // Stores item currently being edited
 
@@ -35,9 +37,10 @@ public partial class EditItemViewModel : ObservableObject // EditItemViewModel =
     [ObservableProperty]
     private string statusMessage = string.Empty;
 
-    public EditItemViewModel(IItemRepository itemRepository) // Constructor. Runs when the viewmodel is created and asks for an IItemRepository. Dependency injection will provide it.
+    public EditItemViewModel(IItemRepository itemRepository, IAuthenticationService authService) // Constructor. Runs when the viewmodel is created and asks for an IItemRepository. Dependency injection will provide it.
     {
         _itemRepository = itemRepository; // Stores the incoming repo in the private field so the rest of the class can use it later
+        _authService = authService; // stores the auth service so the rest of the class can check the logged-in user's local ID
     }
 
     [RelayCommand] //Relay command makes this produce a command the UI can call
@@ -50,6 +53,13 @@ public partial class EditItemViewModel : ObservableObject // EditItemViewModel =
             if (_currentItem == null) // checks if no item was found
             {
                 StatusMessage = "Item not found.";
+                return;
+            }
+
+            if (_currentItem.OwnerId != _authService.CurrentLocalUserId) // checks whether the logged-in local user actually owns this item
+            {
+                StatusMessage = "You can only edit your own items.";
+                _currentItem = null; // clears the current item so update cannot continue on a non-owned item
                 return;
             }
 
@@ -83,6 +93,12 @@ public partial class EditItemViewModel : ObservableObject // EditItemViewModel =
                 return;
             }
 
+            if (_currentItem.OwnerId != _authService.CurrentLocalUserId) // double-checks ownership again before saving, just in case a non-owner somehow reaches this point
+            {
+                StatusMessage = "You can only edit your own items.";
+                return;
+            }
+
             // These lines push the edited form values back into the actual item object
             _currentItem.Title = Title;
             _currentItem.Description = Description;
@@ -101,4 +117,9 @@ public partial class EditItemViewModel : ObservableObject // EditItemViewModel =
             StatusMessage = $"Error: {ex.Message}";
         }
     }
+
+    public async Task LoadItemFromIdAsync(int id) // lets another page load an item into this ViewModel by item ID
+        {
+            await LoadItemAsync(id); // reuses the existing owner-checking load logic already in this ViewModel
+        }
 }
