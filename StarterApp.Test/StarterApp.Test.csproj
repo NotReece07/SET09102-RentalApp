@@ -22,9 +22,11 @@
     <ProjectReference Include="..\StarterApp.Database\StarterApp.Database.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Compile Include="../StarterApp/Services/IRentalService.cs" Link="Services/IRentalService.cs" />
-    <Compile Include="../StarterApp/Services/RentalService.cs" Link="Services/RentalService.cs" />
-  </ItemGroup>
+<ItemGroup>
+  <Compile Include="../StarterApp/Services/IRentalService.cs" Link="Services/IRentalService.cs" />
+  <Compile Include="../StarterApp/Services/RentalService.cs" Link="Services/RentalService.cs" />
+  <Compile Include="../StarterApp/Services/IReviewService.cs" Link="Services/IReviewService.cs" />
+  <Compile Include="../StarterApp/Services/ReviewService.cs" Link="Services/ReviewService.cs" />
+</ItemGroup>
 
 </Project>

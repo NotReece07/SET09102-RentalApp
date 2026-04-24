@@ -44,6 +44,7 @@ public static class MauiProgram
         builder.Services.AddScoped<IRentalRepository, RentalRepository>();
         builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
         builder.Services.AddScoped<IRentalService, RentalService>(); // registers the rental service so ViewModels can use business logic instead of calling the repository directly
+        builder.Services.AddScoped<IReviewService, ReviewService>(); // registers the review service so ViewModels can use review business logic
 
         builder.Services.AddTransient<ItemsListViewModel>();
         builder.Services.AddTransient<ItemsListPage>();

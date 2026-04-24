@@ -33,6 +33,9 @@
                                 <Label Text="{Binding EndDate, StringFormat='End Date: {0}'}" />
                                 <Label Text="{Binding Status, StringFormat='Status: {0}'}" />
                                 <Label Text="{Binding TotalPrice, StringFormat='Total Price: £{0:F2}'}" />
+                                
+                                <Button Text="Leave Review"
+                                        Clicked="OnLeaveReviewClicked" />
                             </VerticalStackLayout>
                         </Border>
                     </DataTemplate>

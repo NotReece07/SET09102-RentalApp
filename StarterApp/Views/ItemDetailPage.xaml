@@ -33,6 +33,47 @@
               <Label Text="{Binding StatusMessage}"
                      TextColor="Red" />
 
+              <BoxView HeightRequest="1"
+                       BackgroundColor="LightGray"
+                       Margin="0,10,0,10" />
+
+              <Label Text="Reviews"
+                     FontSize="22"
+                     FontAttributes="Bold" />
+
+              <Button Text="Load Reviews"
+                      Command="{Binding LoadReviewsCommand}" />
+
+              <CollectionView ItemsSource="{Binding Reviews}">
+                  <CollectionView.ItemTemplate>
+                      <DataTemplate>
+                          <Border Padding="10"
+                                  Margin="0,5"
+                                  Stroke="LightGray">
+                              <Border.StrokeShape>
+                                  <RoundRectangle CornerRadius="8" />
+                              </Border.StrokeShape>
+
+                              <VerticalStackLayout Spacing="5">
+                                  <Label Text="{Binding Rating, StringFormat='Rating: {0}/5'}"
+                                         FontAttributes="Bold" />
+
+                                  <Label Text="{Binding Comment}" />
+
+                                  <Label Text="{Binding Reviewer.FullName, StringFormat='Reviewer: {0}'}"
+                                         FontAttributes="Italic" />
+
+                                  <Label Text="{Binding CreatedAt, StringFormat='Created: {0}'}"
+                                         FontSize="12" />
+                              </VerticalStackLayout>
+                          </Border>
+                      </DataTemplate>
+                  </CollectionView.ItemTemplate>
+              </CollectionView>
+
+              <Label Text="{Binding ReviewStatusMessage}"
+                     TextColor="Green" />
+
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>

@@ -28,4 +28,21 @@ public partial class RentalsPage : ContentPage
             await Navigation.PushAsync(page);
         }
     }
+
+    private async void OnLeaveReviewClicked(object sender, EventArgs e)
+    {
+        if (sender is not Button button)
+            return;
+
+        if (button.BindingContext is not Rental selectedRental)
+            return;
+
+        var page = Application.Current!.Handler!.MauiContext!.Services.GetService<CreateReviewPage>();
+
+        if (page?.BindingContext is CreateReviewViewModel createReviewViewModel)
+        {
+            createReviewViewModel.SetRentalDetails(selectedRental.Id, selectedRental.ItemId);
+            await Navigation.PushAsync(page);
+        }
+    }
 }

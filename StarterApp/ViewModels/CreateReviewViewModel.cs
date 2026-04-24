@@ -1,16 +1,13 @@
-using System.Net;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using StarterApp.Database.Data.Repositories;
-using StarterApp.Database.Models;
 using StarterApp.Services;
 
 namespace StarterApp.ViewModels;
 
 public partial class CreateReviewViewModel : ObservableObject
 {
-    private readonly IReviewRepository _reviewRepository;
-    private readonly IAuthenticationService _authService;
+    private readonly IReviewService _reviewService; // stores the review service so the ViewModel can create reviews through business rules
+    private readonly IAuthenticationService _authService; // stores the auth service so the ViewModel can get the logged-in local user ID
 
     [ObservableProperty] // Generates a public property from the field below and notifies the UI when the value changes
     private int rentalId; // stores the rental ID the review is linked to
@@ -31,12 +28,20 @@ public partial class CreateReviewViewModel : ObservableObject
     private string statusMessage = string.Empty; // used to show success or error messages on the page
 
     // Constructor
-    public CreateReviewViewModel(IReviewRepository reviewRepository, IAuthenticationService authService)
+    public CreateReviewViewModel(IReviewService reviewService, IAuthenticationService authService)
     {
-        _reviewRepository = reviewRepository; // stores reviewRepository so it can be used through the whole class
+        _reviewService = reviewService; // stores reviewService so it can be used through the whole class
         _authService = authService; // stores authService so the ViewModel can get the logged-in local user ID
 
-        reviewerId = _authService.CurrentLocalUserId; // automatically sets the reviewer to the currently logged-in local user
+        ReviewerId = _authService.CurrentLocalUserId; // automatically sets the reviewer to the currently logged-in local user
+    }
+
+    public void SetRentalDetails(int rentalId, int itemId) // lets the rentals page pass in the selected rental and item
+    {
+        RentalId = rentalId; // stores the rental ID so the user does not need to type it manually
+        ItemId = itemId; // stores the item ID so the user does not need to type it manually
+        ReviewerId = _authService.CurrentLocalUserId; // refreshes the reviewer ID in case the logged-in user changed
+        StatusMessage = string.Empty; // clears any old message from the page
     }
 
     [RelayCommand] // Turns the method below into a command the UI can bind to
@@ -44,21 +49,16 @@ public partial class CreateReviewViewModel : ObservableObject
     {
         try
         {
-            var review = new Review // creates a new review object
-            {
-                RentalId = RentalId, // links the review to a rental
-                ItemId = ItemId, // links the review to an item
-                ReviewerId = ReviewerId, // links the review to the logged-in reviewer
-                Rating = Rating, // stores the selected rating
-                Comment = Comment // stores the written comment
-            }; 
+            ReviewerId = _authService.CurrentLocalUserId; // refreshes the logged-in local user ID before saving
 
-            await _reviewRepository.CreateAsync(review);
+            await _reviewService.CreateReviewAsync(
+                RentalId,
+                ReviewerId,
+                Rating,
+                Comment); // sends the review details to the service so business rules are checked before saving
 
-            statusMessage = "Review created successfully.";
+            StatusMessage = "Review created successfully.";
 
-            RentalId = 0; // resets the rental ID field
-            ItemId = 0; // resets the item ID field
             Rating = 5; // resets the rating back to the default
             Comment = string.Empty; // clears the comment box
         }

@@ -11,13 +11,12 @@
                    FontSize="24"
                    FontAttributes="Bold" />
 
-            <Entry Placeholder="Rental ID"
-                   Keyboard="Numeric"
-                   Text="{Binding RentalId}" />
+            <Label Text="Rental and item details are filled in automatically from the selected rental."
+                   FontSize="14" />
 
-            <Entry Placeholder="Item ID"
-                   Keyboard="Numeric"
-                   Text="{Binding ItemId}" />
+            <Label Text="{Binding RentalId, StringFormat='Rental ID: {0}'}" />
+
+            <Label Text="{Binding ItemId, StringFormat='Item ID: {0}'}" />
 
             <Entry Placeholder="Rating (1-5)"
                    Keyboard="Numeric"

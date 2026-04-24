@@ -7,7 +7,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StarterApp.Database.Models;
 using StarterApp.Services;
-using StarterApp.Views;
 namespace StarterApp.ViewModels;
 
 /// @brief View model for the main dashboard page
@@ -163,11 +162,5 @@ public partial class MainViewModel : BaseViewModel
     private async Task NavigateToRentalsAsync()
     {
         await _navigationService.NavigateToAsync("RentalsPage"); // opens the rentals list page instead of the rental request page
-    }
-
-    [RelayCommand]
-    private async Task NavigateToCreateReviewAsync()
-    {
-        await _navigationService.NavigateToAsync(nameof(CreateReviewPage)); // opens the review creation page from the dashboard
     }
 }
