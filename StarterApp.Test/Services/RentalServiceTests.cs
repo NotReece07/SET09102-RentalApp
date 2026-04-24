@@ -216,6 +216,83 @@ public class RentalServiceTests
         Assert.Equal("This item is already booked for the selected dates.", exception.Message);
     }
 
+    [Fact]
+    public async Task CompleteRentalAsync_ApprovedRental_ChangesStatusToCompleted()
+    {
+        // Arrange
+        var itemRepository = new FakeItemRepository();
+        var rentalRepository = new FakeRentalRepository();
+
+        var item = new Item
+        {
+            Id = 1,
+            Title = "Power Drill",
+            DailyRate = 10.00m,
+            OwnerId = 100
+        };
+
+        itemRepository.Items.Add(item);
+
+        rentalRepository.Rentals.Add(new Rental
+        {
+            Id = 1,
+            ItemId = 1,
+            Item = item,
+            BorrowerId = 200,
+            StartDate = new DateOnly(2026, 4, 23),
+            EndDate = new DateOnly(2026, 4, 25),
+            Status = "Approved",
+            TotalPrice = 30.00m
+        });
+
+        var service = new RentalService(rentalRepository, itemRepository);
+
+        // Act
+        await service.CompleteRentalAsync(rentalId: 1, currentBorrowerId: 200);
+
+        // Assert
+        Assert.Equal("Completed", rentalRepository.Rentals[0].Status);
+    }
+
+    [Fact]
+    public async Task CompleteRentalAsync_NotBorrower_ThrowsException()
+    {
+        // Arrange
+        var itemRepository = new FakeItemRepository();
+        var rentalRepository = new FakeRentalRepository();
+
+        var item = new Item
+        {
+            Id = 1,
+            Title = "Power Drill",
+            DailyRate = 10.00m,
+            OwnerId = 100
+        };
+
+        itemRepository.Items.Add(item);
+
+        rentalRepository.Rentals.Add(new Rental
+        {
+            Id = 1,
+            ItemId = 1,
+            Item = item,
+            BorrowerId = 200,
+            StartDate = new DateOnly(2026, 4, 23),
+            EndDate = new DateOnly(2026, 4, 25),
+            Status = "Approved",
+            TotalPrice = 30.00m
+        });
+
+        var service = new RentalService(rentalRepository, itemRepository);
+
+        // Act
+        var exception = await Assert.ThrowsAsync<Exception>(() =>
+            service.CompleteRentalAsync(rentalId: 1, currentBorrowerId: 999));
+
+        // Assert
+        Assert.Equal("You can only complete rentals that you requested.", exception.Message);
+    }
+
     private class FakeRentalRepository : IRentalRepository
     {
         public List<Rental> Rentals { get; } = new();

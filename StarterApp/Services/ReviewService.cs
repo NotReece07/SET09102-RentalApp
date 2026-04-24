@@ -43,9 +43,9 @@ public class ReviewService : IReviewService
             throw new Exception("You can only review rentals that you requested.");
         }
 
-        if (rental.Status != "Approved" && rental.Status != "Completed")
+        if (rental.Status != "Completed")
         {
-            throw new Exception("You can only review approved or completed rentals.");
+            throw new Exception("You can only review completed rentals.");
         }
 
         var existingReviews = await _reviewRepository.GetByReviewerIdAsync(reviewerId); // loads reviews already written by this user

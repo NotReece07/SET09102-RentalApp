@@ -19,7 +19,7 @@ public class ReviewServiceTests
             Id = 1,
             ItemId = 10,
             BorrowerId = 200,
-            Status = "Approved"
+            Status = "Completed"
         });
 
         var service = new ReviewService(reviewRepository, rentalRepository);
@@ -52,7 +52,7 @@ public class ReviewServiceTests
             Id = 1,
             ItemId = 10,
             BorrowerId = 200,
-            Status = "Approved"
+            Status = "Completed"
         });
 
         var service = new ReviewService(reviewRepository, rentalRepository);
@@ -81,7 +81,7 @@ public class ReviewServiceTests
             Id = 1,
             ItemId = 10,
             BorrowerId = 200,
-            Status = "Approved"
+            Status = "Completed"
         });
 
         var service = new ReviewService(reviewRepository, rentalRepository);
@@ -110,7 +110,7 @@ public class ReviewServiceTests
             Id = 1,
             ItemId = 10,
             BorrowerId = 200,
-            Status = "Approved"
+            Status = "Completed"
         });
 
         reviewRepository.Reviews.Add(new Review
@@ -138,7 +138,7 @@ public class ReviewServiceTests
     }
 
     [Fact]
-    public async Task CreateReviewAsync_RentalNotApprovedOrCompleted_ThrowsException()
+    public async Task CreateReviewAsync_RentalNotCompleted_ThrowsException()
     {
         // Arrange
         var reviewRepository = new FakeReviewRepository();
@@ -149,7 +149,7 @@ public class ReviewServiceTests
             Id = 1,
             ItemId = 10,
             BorrowerId = 200,
-            Status = "Requested"
+            Status = "Approved"
         });
 
         var service = new ReviewService(reviewRepository, rentalRepository);
@@ -160,10 +160,10 @@ public class ReviewServiceTests
                 rentalId: 1,
                 reviewerId: 200,
                 rating: 5,
-                comment: "Trying to review before approval."));
+                comment: "Trying to review before completion."));
 
         // Assert
-        Assert.Equal("You can only review approved or completed rentals.", exception.Message);
+        Assert.Equal("You can only review completed rentals.", exception.Message);
     }
 
     [Fact]

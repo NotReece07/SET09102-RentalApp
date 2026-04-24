@@ -34,8 +34,15 @@
                                 <Label Text="{Binding Status, StringFormat='Status: {0}'}" />
                                 <Label Text="{Binding TotalPrice, StringFormat='Total Price: £{0:F2}'}" />
                                 
-                                <Button Text="Leave Review"
-                                        Clicked="OnLeaveReviewClicked" />
+                                <HorizontalStackLayout Spacing="10"
+                                                    Margin="0,10,0,0">
+                                    <Button Text="Complete"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.CompleteRentalCommand}"
+                                            CommandParameter="{Binding .}" />
+
+                                    <Button Text="Leave Review"
+                                            Clicked="OnLeaveReviewClicked" />
+                                </HorizontalStackLayout>
                             </VerticalStackLayout>
                         </Border>
                     </DataTemplate>

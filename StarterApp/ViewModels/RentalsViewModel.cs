@@ -125,6 +125,37 @@ public partial class RentalsViewModel : ObservableObject
     }
 
     [RelayCommand] // Turns the method below into a command the UI can bind to
+    private async Task CompleteRentalAsync(Rental? rental) // completes a selected approved rental if the current user is the borrower
+    {
+        try
+        {
+            if (rental == null)
+            {
+                return; // stops the command if no rental was passed in
+            }
+
+            var localUserId = _authService.CurrentLocalUserId; // gets the logged-in borrower's local database ID
+
+            if (localUserId == 0)
+            {
+                StatusMessage = "No local user found.";
+                return;
+            }
+
+            await _rentalService.CompleteRentalAsync(rental.Id, localUserId); // asks the service layer to complete the rental using business rules
+
+            StatusMessage = "Rental completed successfully.";
+
+            await LoadOutgoingRentalsAsync(); // refreshes the outgoing rental list after completion
+            await LoadIncomingRentalsAsync(); // refreshes the incoming rental list too so the owner-side status is updated
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = ex.InnerException?.Message ?? ex.Message; // stores the real error message so it can be shown on the page instead of crashing
+        }
+    }
+
+    [RelayCommand] // Turns the method below into a command the UI can bind to
     private async Task RejectRentalAsync(Rental? rental) // rejects a selected rental request if the current user owns the related item
     {
         try

@@ -145,6 +145,31 @@ public class RentalService : IRentalService
         await _rentalRepository.UpdateAsync(rental); // saves the rejection to the database
     }
 
+    public async Task CompleteRentalAsync(int rentalId, int currentBorrowerId)
+    {
+        var rental = await _rentalRepository.GetByIdAsync(rentalId); // loads the rental being completed
+
+        if (rental == null)
+        {
+            throw new Exception("Rental not found."); // stops completion if rental does not exist
+        }
+
+        if (rental.BorrowerId != currentBorrowerId)
+        {
+            throw new Exception("You can only complete rentals that you requested."); // blocks other users from completing the rental
+        }
+
+        if (rental.Status != "Approved")
+        {
+            throw new Exception("Only approved rentals can be completed."); // only approved rentals can move to completed
+        }
+
+        rental.Status = "Completed"; // updates the rental to completed
+        rental.UpdatedAt = DateTime.UtcNow;
+
+        await _rentalRepository.UpdateAsync(rental); // saves the completed status to the database
+    }
+
     public async Task<List<Rental>> GetOutgoingRentalsAsync(int borrowerId)
     {
         if (borrowerId <= 0)
