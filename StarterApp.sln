@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StarterApp.Database", "Star
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StarterApp.Migrations", "StarterApp.Migrations\StarterApp.Migrations.csproj", "{56596C37-4445-4915-8BA5-F9DADDE70F15}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StarterApp.Test", "StarterApp.Test\StarterApp.Test.csproj", "{6E8FA54B-5CB7-43E4-B501-1D1D435EEF6B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +57,18 @@ Global
 		{56596C37-4445-4915-8BA5-F9DADDE70F15}.Release|x64.Build.0 = Release|Any CPU
 		{56596C37-4445-4915-8BA5-F9DADDE70F15}.Release|x86.ActiveCfg = Release|Any CPU
 		{56596C37-4445-4915-8BA5-F9DADDE70F15}.Release|x86.Build.0 = Release|Any CPU
+		{6E8FA54B-5CB7-43E4-B501-1D1D435EEF6B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E8FA54B-5CB7-43E4-B501-1D1D435EEF6B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E8FA54B-5CB7-43E4-B501-1D1D435EEF6B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{6E8FA54B-5CB7-43E4-B501-1D1D435EEF6B}.Debug|x64.Build.0 = Debug|Any CPU
+		{6E8FA54B-5CB7-43E4-B501-1D1D435EEF6B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{6E8FA54B-5CB7-43E4-B501-1D1D435EEF6B}.Debug|x86.Build.0 = Debug|Any CPU
+		{6E8FA54B-5CB7-43E4-B501-1D1D435EEF6B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E8FA54B-5CB7-43E4-B501-1D1D435EEF6B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E8FA54B-5CB7-43E4-B501-1D1D435EEF6B}.Release|x64.ActiveCfg = Release|Any CPU
+		{6E8FA54B-5CB7-43E4-B501-1D1D435EEF6B}.Release|x64.Build.0 = Release|Any CPU
+		{6E8FA54B-5CB7-43E4-B501-1D1D435EEF6B}.Release|x86.ActiveCfg = Release|Any CPU
+		{6E8FA54B-5CB7-43E4-B501-1D1D435EEF6B}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

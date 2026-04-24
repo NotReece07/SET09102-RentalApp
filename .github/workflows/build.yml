@@ -1,0 +1,45 @@
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore database project
+        run: dotnet restore StarterApp.Database/StarterApp.Database.csproj
+
+      - name: Restore test project
+        run: dotnet restore StarterApp.Test/StarterApp.Test.csproj
+
+      - name: Build database project
+        run: dotnet build StarterApp.Database/StarterApp.Database.csproj --configuration Release --no-restore
+
+      - name: Build test project
+        run: dotnet build StarterApp.Test/StarterApp.Test.csproj --configuration Release --no-restore
+
+      - name: Run tests with coverage
+        run: dotnet test StarterApp.Test/StarterApp.Test.csproj --configuration Release --no-build --collect:"XPlat Code Coverage"
+
+      - name: Upload coverage report artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: StarterApp.Test/TestResults/**/*.xml
