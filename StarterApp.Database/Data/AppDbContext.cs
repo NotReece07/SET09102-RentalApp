@@ -32,7 +32,10 @@ public class AppDbContext : DbContext
             connectionString = config.GetConnectionString("DevelopmentConnection");
         }
 
-        optionsBuilder.UseNpgsql(connectionString);
+        optionsBuilder.UseNpgsql(connectionString, options =>
+        {
+            options.UseNetTopologySuite(); // enables PostGIS / spatial support for NetTopologySuite Point values
+        });
     }
 
     public DbSet<Role> Roles { get; set; }
@@ -88,6 +91,8 @@ public class AppDbContext : DbContext
             entity.Property(e => e.Category).HasMaxLength(50);
             entity.Property(e => e.LocationName).HasMaxLength(200);
             entity.Property(e => e.DailyRate).HasColumnType("decimal(10,2)"); // once again, just letting the daily rate be up to 10 numbers, with 2 after the decimal point
+            entity.Property(e => e.Location).HasColumnType("geography (point, 4326)"); // stores item location as a PostGIS geography point using GPS coordinates
+            entity.HasIndex(e => e.Location).HasMethod("GIST"); // creates a spatial index to make nearby searches faster
 
             entity.HasOne(e => e.Owner) //One item has one related user. That related user is stored in the Owner Propertty (one item, one owner)
                 .WithMany() //User can be linked to many items (One user, many items)

@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using StarterApp.Database.Models;
 using StarterApp.Database.Data;
+using NetTopologySuite.Geometries;
 
 namespace StarterApp.Database.Data.Repositories;
 
@@ -22,6 +23,7 @@ public class ItemRepository : IItemRepository //ItemRepository will follow the r
             .Include(i => i.Owner)
             .ToListAsync();
     }
+
     //finds one item by its ID
     public async Task<Item?> GetByIdAsync(int id)
     {
@@ -31,9 +33,32 @@ public class ItemRepository : IItemRepository //ItemRepository will follow the r
             .FirstOrDefaultAsync(i => i.Id == id);
     }
 
+    public async Task<List<Item>> GetByOwnerIdAsync(int ownerId)
+    {
+        return await _context.Items
+            .AsNoTracking() // tells EF Core to fetch fresh items from the db owned by this user instead of tracked cached ones
+            .Include(i => i.Owner)
+            .Where(i => i.OwnerId == ownerId)
+            .ToListAsync();
+    }
+
+    public async Task<List<Item>> GetNearbyAsync(double latitude, double longitude, double radiusKm)
+    {
+        var userPoint = CreatePoint(latitude, longitude); // creates a PostGIS point from the user's current location
+        var radiusMeters = radiusKm * 1000; // converts km into metres because geography distance uses metres
+
+        return await _context.Items
+            .AsNoTracking() // fetches fresh read-only item data
+            .Include(i => i.Owner)
+            .Where(i => i.Location != null && i.Location.Distance(userPoint) <= radiusMeters)
+            .ToListAsync(); // asks PostGIS to return only items within the chosen radius
+    }
+
     //Adds a new item to the database and saves it
     public async Task<Item> CreateAsync(Item item)
     {
+        item.Location = CreatePoint(item.Latitude, item.Longitude); // creates the spatial location before saving the item
+
         _context.Items.Add(item);
         await _context.SaveChangesAsync();
         return item;
@@ -56,7 +81,9 @@ public class ItemRepository : IItemRepository //ItemRepository will follow the r
         existingItem.LocationName = item.LocationName;
         existingItem.Latitude = item.Latitude;
         existingItem.Longitude = item.Longitude;
+        existingItem.Location = CreatePoint(item.Latitude, item.Longitude); // updates the PostGIS location when latitude/longitude changes
         existingItem.OwnerId = item.OwnerId;
+        existingItem.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync(); // saves the updated tracked item to the database
     }
@@ -73,12 +100,8 @@ public class ItemRepository : IItemRepository //ItemRepository will follow the r
         }
     }
 
-    public async Task<List<Item>> GetByOwnerIdAsync(int ownerId)
+    private static Point CreatePoint(double latitude, double longitude)
     {
-        return await _context.Items
-            .AsNoTracking() // tells EF Core to fetch fresh items from the db owned by this user instead of tracked cached ones
-            .Include(i => i.Owner)
-            .Where(i => i.OwnerId == ownerId)
-            .ToListAsync();
+        return new Point(longitude, latitude) { SRID = 4326 }; // PostGIS expects X = longitude and Y = latitude
     }
 }

@@ -432,5 +432,10 @@ public class RentalServiceTests
 
             return Task.CompletedTask;
         }
+
+        public Task<List<Item>> GetNearbyAsync(double latitude, double longitude, double radiusKm)
+        {
+            return Task.FromResult(Items);
+        }
     }
 }

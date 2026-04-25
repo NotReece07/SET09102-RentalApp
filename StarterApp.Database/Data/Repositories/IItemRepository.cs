@@ -1,5 +1,3 @@
-using System.Net.ServerSentEvents;
-using System.Runtime.Intrinsics.X86;
 using StarterApp.Database.Models;
 
 namespace StarterApp.Database.Data.Repositories;
@@ -10,6 +8,7 @@ public interface IItemRepository // public (other parts of the program can use i
     Task<List<Item>> GetAllAsync(); //Task = gives back a promise that the answer will come later. Will return a <List<Item>>
     Task<Item?> GetByIdAsync(int id);
     Task<List<Item>> GetByOwnerIdAsync(int ownerId);
+    Task<List<Item>> GetNearbyAsync(double latitude, double longitude, double radiusKm); // gets items within a radius of the user's location
     Task<Item> CreateAsync(Item item);
     Task UpdateAsync(Item item);
     Task DeleteAsync(int id);

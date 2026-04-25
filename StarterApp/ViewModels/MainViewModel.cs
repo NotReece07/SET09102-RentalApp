@@ -163,4 +163,10 @@ public partial class MainViewModel : BaseViewModel
     {
         await _navigationService.NavigateToAsync("RentalsPage"); // opens the rentals list page instead of the rental request page
     }
+
+    [RelayCommand]
+    private async Task NavigateToNearbyItemsAsync()
+    {
+        await _navigationService.NavigateToAsync("NearbyItemsPage"); // opens the nearby item search page
+    }
 }

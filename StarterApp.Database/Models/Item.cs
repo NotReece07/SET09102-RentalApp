@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using NetTopologySuite.Geometries;
 
 namespace StarterApp.Database.Models;
 
@@ -30,6 +31,8 @@ public class Item
     public double Latitude { get; set; }
 
     public double Longitude { get; set; }
+
+    public Point? Location { get; set; } // stores the real PostGIS spatial point used for nearby search
 
     public int OwnerId { get; set; }
 
