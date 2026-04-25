@@ -25,23 +25,32 @@
                             </Border.StrokeShape>
 
                             <VerticalStackLayout Spacing="5">
-                                <Label Text="{Binding Item.Title}"
+                                <Label Text="{Binding Rental.Item.Title}"
                                        FontSize="18"
                                        FontAttributes="Bold" />
-                                <Label Text="{Binding Item.Description}" />
-                                <Label Text="{Binding StartDate, StringFormat='Start Date: {0}'}" />
-                                <Label Text="{Binding EndDate, StringFormat='End Date: {0}'}" />
-                                <Label Text="{Binding Status, StringFormat='Status: {0}'}" />
-                                <Label Text="{Binding TotalPrice, StringFormat='Total Price: £{0:F2}'}" />
+
+                                <Label Text="{Binding Rental.Item.Description}" />
+
+                                <Label Text="{Binding Rental.StartDate, StringFormat='Start Date: {0}'}" />
+
+                                <Label Text="{Binding Rental.EndDate, StringFormat='End Date: {0}'}" />
+
+                                <Label Text="{Binding Rental.Status, StringFormat='Status: {0}'}" />
+
+                                <Label Text="{Binding Rental.TotalPrice, StringFormat='Total Price: £{0:F2}'}" />
                                 
                                 <HorizontalStackLayout Spacing="10"
-                                                    Margin="0,10,0,0">
+                                                       Margin="0,10,0,0">
+
                                     <Button Text="Complete"
+                                            IsVisible="{Binding CanComplete}"
                                             Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.CompleteRentalCommand}"
                                             CommandParameter="{Binding .}" />
 
                                     <Button Text="Leave Review"
+                                            IsVisible="{Binding CanReview}"
                                             Clicked="OnLeaveReviewClicked" />
+
                                 </HorizontalStackLayout>
                             </VerticalStackLayout>
                         </Border>
@@ -74,18 +83,25 @@
                             </Border.GestureRecognizers>
 
                             <VerticalStackLayout Spacing="5">
-                                <Label Text="{Binding Item.Title}"
+                                <Label Text="{Binding Rental.Item.Title}"
                                        FontSize="18"
                                        FontAttributes="Bold" />
-                                <Label Text="{Binding Borrower.FullName, StringFormat='Borrower: {0}'}"
+
+                                <Label Text="{Binding Rental.Borrower.FullName, StringFormat='Borrower: {0}'}"
                                        FontAttributes="Italic" />
-                                <Label Text="{Binding StartDate, StringFormat='Start Date: {0}'}" />
-                                <Label Text="{Binding EndDate, StringFormat='End Date: {0}'}" />
-                                <Label Text="{Binding Status, StringFormat='Status: {0}'}" />
-                                <Label Text="{Binding TotalPrice, StringFormat='Total Price: £{0:F2}'}" />
+
+                                <Label Text="{Binding Rental.StartDate, StringFormat='Start Date: {0}'}" />
+
+                                <Label Text="{Binding Rental.EndDate, StringFormat='End Date: {0}'}" />
+
+                                <Label Text="{Binding Rental.Status, StringFormat='Status: {0}'}" />
+
+                                <Label Text="{Binding Rental.TotalPrice, StringFormat='Total Price: £{0:F2}'}" />
 
                                 <HorizontalStackLayout Spacing="10"
-                                                       Margin="0,10,0,0">
+                                                       Margin="0,10,0,0"
+                                                       IsVisible="{Binding CanApproveOrReject}">
+
                                     <Button Text="Approve"
                                             Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.ApproveRentalCommand}"
                                             CommandParameter="{Binding .}" />
@@ -93,6 +109,7 @@
                                     <Button Text="Reject"
                                             Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RejectRentalCommand}"
                                             CommandParameter="{Binding .}" />
+
                                 </HorizontalStackLayout>
                             </VerticalStackLayout>
                         </Border>

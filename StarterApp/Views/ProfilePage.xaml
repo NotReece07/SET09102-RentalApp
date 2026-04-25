@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage x:Class="StarterApp.Views.ProfilePage"
+             xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             Title="{Binding Title}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="15">
+
+            <Label Text="User Profile"
+                   FontSize="24"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center" />
+
+            <Border Padding="20"
+                    Stroke="LightGray"
+                    BackgroundColor="White">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="12" />
+                </Border.StrokeShape>
+
+                <VerticalStackLayout Spacing="10">
+
+                    <Label Text="Profile Details"
+                           FontSize="18"
+                           FontAttributes="Bold" />
+
+                    <Label Text="{Binding CurrentUser.FullName, StringFormat='Name: {0}'}"
+                           FontSize="16" />
+
+                    <Label Text="{Binding CurrentUser.Email, StringFormat='Email: {0}'}"
+                           FontSize="16" />
+
+                    <BoxView HeightRequest="1"
+                             BackgroundColor="LightGray"
+                             Margin="0,10,0,10" />
+
+                    <Label Text="Owner Rating"
+                           FontSize="18"
+                           FontAttributes="Bold" />
+
+                    <Label Text="{Binding AverageRatingText}"
+                           FontSize="16"
+                           FontAttributes="Bold" />
+
+                    <Label Text="This rating is calculated from reviews left on items you own."
+                           FontSize="13" />
+
+                </VerticalStackLayout>
+            </Border>
+
+            <Button Text="Refresh Profile"
+                    Command="{Binding LoadProfileCommand}" />
+
+            <Button Text="Change Password"
+                    Command="{Binding TogglePasswordChangeModeCommand}" />
+
+            <VerticalStackLayout Spacing="10"
+                                 IsVisible="{Binding IsChangingPassword}">
+
+                <Entry Placeholder="Current Password"
+                       IsPassword="True"
+                       Text="{Binding CurrentPassword}" />
+
+                <Entry Placeholder="New Password"
+                       IsPassword="True"
+                       Text="{Binding NewPassword}" />
+
+                <Entry Placeholder="Confirm New Password"
+                       IsPassword="True"
+                       Text="{Binding ConfirmNewPassword}" />
+
+                <Button Text="Save New Password"
+                        Command="{Binding ChangePasswordCommand}" />
+
+            </VerticalStackLayout>
+
+            <Label Text="{Binding ErrorMessage}"
+                   TextColor="Red"
+                   IsVisible="{Binding HasError}" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

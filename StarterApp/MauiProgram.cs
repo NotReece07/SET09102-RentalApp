@@ -65,6 +65,9 @@ public static class MauiProgram
         builder.Services.AddTransient<CreateReviewViewModel>();
         builder.Services.AddTransient<CreateReviewPage>();
 
+        builder.Services.AddTransient<ProfileViewModel>(); // profile ViewModel displays user details and average owner rating
+        builder.Services.AddTransient<ProfilePage>(); // profile page shown from the dashboard/profile toolbar
+
         builder.Services.AddTransient<CreateRentalRequestViewModel>();
         builder.Services.AddTransient<CreateRentalRequestPage>();
         builder.Services.AddTransient<RentalsViewModel>();

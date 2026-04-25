@@ -11,7 +11,7 @@ using StarterApp.Services;
 namespace StarterApp.ViewModels;
 
 /// @brief View model for the user profile page
-/// @details Manages user profile display and password change functionality
+/// @details Manages user profile display, average owner rating, and password change functionality
 /// @extends BaseViewModel
 public partial class ProfileViewModel : BaseViewModel
 {
@@ -21,10 +21,15 @@ public partial class ProfileViewModel : BaseViewModel
     /// @brief Navigation service for managing page navigation
     private readonly INavigationService _navigationService;
 
+    private readonly IReviewService _reviewService; // stores the review service so the profile can show the user's average rating
+
     /// @brief The current user's profile information
     /// @details Observable property containing the current user's data
     [ObservableProperty]
     private User? currentUser;
+
+    [ObservableProperty]
+    private string averageRatingText = "Average Rating: No reviews yet"; // stores the average rating text shown on the profile page
 
     /// @brief The user's current password for verification
     /// @details Observable property bound to the current password input field
@@ -49,11 +54,13 @@ public partial class ProfileViewModel : BaseViewModel
     /// @brief Initializes a new instance of the ProfileViewModel class
     /// @param authService The authentication service instance
     /// @param navigationService The navigation service instance
+    /// @param reviewService The review service used to calculate profile rating
     /// @details Sets up the required services, initializes the title, and loads user data
-    public ProfileViewModel(IAuthenticationService authService, INavigationService navigationService)
+    public ProfileViewModel(IAuthenticationService authService, INavigationService navigationService, IReviewService reviewService)
     {
         _authService = authService;
         _navigationService = navigationService;
+        _reviewService = reviewService; // stores the review service so it can be used through the whole class
         Title = "Profile";
 
         LoadUserData();
@@ -64,6 +71,41 @@ public partial class ProfileViewModel : BaseViewModel
     private void LoadUserData()
     {
         CurrentUser = _authService.CurrentUser;
+    }
+
+    [RelayCommand] // Turns the method below into a command the UI can bind to
+    public async Task LoadProfileAsync()
+    {
+        try
+        {
+            ClearError();
+
+            CurrentUser = _authService.CurrentUser; // gets the currently logged-in user
+
+            var localUserId = _authService.CurrentLocalUserId; // gets the local database user ID used by items and reviews
+
+            if (CurrentUser == null || localUserId <= 0)
+            {
+                AverageRatingText = "Average Rating: No reviews yet"; // shows this if no user/local user can be found
+                return;
+            }
+
+            var averageRating = await _reviewService.GetAverageRatingForUserAsync(localUserId); // calculates the average rating from reviews on items this user owns
+            var reviewCount = await _reviewService.GetReviewCountForUserAsync(localUserId); // counts how many reviews were found for this user's items
+
+            if (reviewCount == 0)
+            {
+                AverageRatingText = "Average Rating: No reviews yet"; // shows this if the user's items have no reviews
+            }
+            else
+            {
+                AverageRatingText = $"Average Rating: {averageRating:F1}/5 from {reviewCount} review(s)"; // shows the average rating and review count
+            }
+        }
+        catch (Exception ex)
+        {
+            SetError($"Failed to load profile rating: {ex.Message}"); // stores an error message so it can be shown on the page instead of crashing
+        }
     }
 
     /// @brief Changes the user's password

@@ -1,5 +1,4 @@
 using Microsoft.Extensions.DependencyInjection;
-using StarterApp.Database.Models;
 using StarterApp.ViewModels;
 
 namespace StarterApp.Views;
@@ -14,8 +13,10 @@ public partial class RentalsPage : ContentPage
 
     private async void OnIncomingRentalTapped(object sender, TappedEventArgs e)
     {
-        if (e.Parameter is not Rental selectedRental)
+        if (e.Parameter is not RentalDisplayItem selectedRentalDisplayItem)
             return;
+
+        var selectedRental = selectedRentalDisplayItem.Rental; // gets the actual rental from the display wrapper
 
         if (selectedRental.Item == null)
             return;
@@ -34,14 +35,16 @@ public partial class RentalsPage : ContentPage
         if (sender is not Button button)
             return;
 
-        if (button.BindingContext is not Rental selectedRental)
+        if (button.BindingContext is not RentalDisplayItem selectedRentalDisplayItem)
             return;
+
+        var selectedRental = selectedRentalDisplayItem.Rental; // gets the actual rental from the display wrapper
 
         var page = Application.Current!.Handler!.MauiContext!.Services.GetService<CreateReviewPage>();
 
-        if (page?.BindingContext is CreateReviewViewModel createReviewViewModel)
+        if (page?.BindingContext is CreateReviewViewModel reviewViewModel)
         {
-            createReviewViewModel.SetRentalDetails(selectedRental.Id, selectedRental.ItemId);
+            reviewViewModel.SetRentalDetails(selectedRental.Id, selectedRental.ItemId); // passes rental/item IDs into the review page
             await Navigation.PushAsync(page);
         }
     }

@@ -94,7 +94,7 @@ public partial class MainViewModel : BaseViewModel
     [RelayCommand]
     private async Task NavigateToProfileAsync()
     {
-        await _navigationService.NavigateToAsync("TempPage");
+        await _navigationService.NavigateToAsync("ProfilePage");
     }
 
     /// @brief Navigates to the settings page

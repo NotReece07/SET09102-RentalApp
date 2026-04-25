@@ -12,10 +12,10 @@ public partial class RentalsViewModel : ObservableObject
     private readonly IAuthenticationService _authService; // stores the auth service so the ViewModel can get the logged-in user's local database ID
 
     [ObservableProperty] // Generates a public property from the field below and notifies the UI when the value changes
-    private ObservableCollection<Rental> outgoingRentals = new(); // stores the rental requests made by the current user
+    private ObservableCollection<RentalDisplayItem> outgoingRentals = new(); // stores the rental requests made by the current user, wrapped with button visibility rules
 
     [ObservableProperty]
-    private ObservableCollection<Rental> incomingRentals = new(); // stores rental requests for items owned by the current user
+    private ObservableCollection<RentalDisplayItem> incomingRentals = new(); // stores rental requests for items owned by the current user, wrapped with button visibility rules
 
     [ObservableProperty]
     private string statusMessage = string.Empty; // used to show messages such as errors or "no rentals found"
@@ -37,13 +37,15 @@ public partial class RentalsViewModel : ObservableObject
             if (localUserId == 0)
             {
                 StatusMessage = "No local user found.";
-                OutgoingRentals = new ObservableCollection<Rental>();
+                OutgoingRentals = new ObservableCollection<RentalDisplayItem>();
                 return;
             }
 
             var rentals = await _rentalService.GetOutgoingRentalsAsync(localUserId); // gets all rentals where this user is the borrower through the service layer
 
-            OutgoingRentals = new ObservableCollection<Rental>(rentals); // puts the rental list into an ObservableCollection so the UI can display it
+            OutgoingRentals = new ObservableCollection<RentalDisplayItem>(
+                rentals.Select(rental => new RentalDisplayItem(rental))
+            ); // wraps each rental so the UI knows which buttons should be visible
 
             if (OutgoingRentals.Count == 0)
             {
@@ -70,13 +72,15 @@ public partial class RentalsViewModel : ObservableObject
             if (localUserId == 0)
             {
                 StatusMessage = "No local user found.";
-                IncomingRentals = new ObservableCollection<Rental>();
+                IncomingRentals = new ObservableCollection<RentalDisplayItem>();
                 return;
             }
 
             var rentals = await _rentalService.GetIncomingRentalsAsync(localUserId); // gets all rentals for items owned by the current user through the service layer
 
-            IncomingRentals = new ObservableCollection<Rental>(rentals); // puts the combined incoming list into an ObservableCollection so the UI can display it
+            IncomingRentals = new ObservableCollection<RentalDisplayItem>(
+                rentals.Select(rental => new RentalDisplayItem(rental))
+            ); // wraps each rental so the UI knows which buttons should be visible
 
             if (IncomingRentals.Count == 0)
             {
@@ -94,11 +98,11 @@ public partial class RentalsViewModel : ObservableObject
     }
 
     [RelayCommand] // Turns the method below into a command the UI can bind to
-    private async Task ApproveRentalAsync(Rental? rental) // approves a selected rental request if the current user owns the related item
+    private async Task ApproveRentalAsync(RentalDisplayItem? rentalDisplayItem) // approves a selected rental request if the current user owns the related item
     {
         try
         {
-            if (rental == null)
+            if (rentalDisplayItem == null)
             {
                 return; // stops the command if no rental was passed in
             }
@@ -111,7 +115,7 @@ public partial class RentalsViewModel : ObservableObject
                 return;
             }
 
-            await _rentalService.ApproveRentalAsync(rental.Id, localUserId); // asks the service layer to approve the rental using business rules
+            await _rentalService.ApproveRentalAsync(rentalDisplayItem.Rental.Id, localUserId); // asks the service layer to approve the rental using business rules
 
             StatusMessage = "Rental approved successfully.";
 
@@ -125,11 +129,11 @@ public partial class RentalsViewModel : ObservableObject
     }
 
     [RelayCommand] // Turns the method below into a command the UI can bind to
-    private async Task CompleteRentalAsync(Rental? rental) // completes a selected approved rental if the current user is the borrower
+    private async Task CompleteRentalAsync(RentalDisplayItem? rentalDisplayItem) // completes a selected approved rental if the current user is the borrower
     {
         try
         {
-            if (rental == null)
+            if (rentalDisplayItem == null)
             {
                 return; // stops the command if no rental was passed in
             }
@@ -142,7 +146,7 @@ public partial class RentalsViewModel : ObservableObject
                 return;
             }
 
-            await _rentalService.CompleteRentalAsync(rental.Id, localUserId); // asks the service layer to complete the rental using business rules
+            await _rentalService.CompleteRentalAsync(rentalDisplayItem.Rental.Id, localUserId); // asks the service layer to complete the rental using business rules
 
             StatusMessage = "Rental completed successfully.";
 
@@ -156,11 +160,11 @@ public partial class RentalsViewModel : ObservableObject
     }
 
     [RelayCommand] // Turns the method below into a command the UI can bind to
-    private async Task RejectRentalAsync(Rental? rental) // rejects a selected rental request if the current user owns the related item
+    private async Task RejectRentalAsync(RentalDisplayItem? rentalDisplayItem) // rejects a selected rental request if the current user owns the related item
     {
         try
         {
-            if (rental == null)
+            if (rentalDisplayItem == null)
             {
                 return; // stops the command if no rental was passed in
             }
@@ -173,7 +177,7 @@ public partial class RentalsViewModel : ObservableObject
                 return;
             }
 
-            await _rentalService.RejectRentalAsync(rental.Id, localUserId); // asks the service layer to reject the rental using business rules
+            await _rentalService.RejectRentalAsync(rentalDisplayItem.Rental.Id, localUserId); // asks the service layer to reject the rental using business rules
 
             StatusMessage = "Rental rejected successfully.";
 
@@ -185,4 +189,20 @@ public partial class RentalsViewModel : ObservableObject
             StatusMessage = ex.InnerException?.Message ?? ex.Message; // stores the real error message so it can be shown on the page instead of crashing
         }
     }
+}
+
+public class RentalDisplayItem
+{
+    public Rental Rental { get; } // stores the actual rental record
+
+    public RentalDisplayItem(Rental rental)
+    {
+        Rental = rental; // stores the rental passed in from the ViewModel
+    }
+
+    public bool CanApproveOrReject => Rental.Status == "Requested"; // owner can only approve/reject requested rentals
+
+    public bool CanComplete => Rental.Status == "Approved"; // borrower can only complete approved rentals
+
+    public bool CanReview => Rental.Status == "Completed"; // borrower can only review completed rentals
 }

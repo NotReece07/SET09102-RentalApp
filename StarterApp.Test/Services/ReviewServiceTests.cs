@@ -1,7 +1,6 @@
 using StarterApp.Database.Data.Repositories;
 using StarterApp.Database.Models;
 using StarterApp.Services;
-using Xunit;
 
 namespace StarterApp.Test.Services;
 
@@ -13,6 +12,7 @@ public class ReviewServiceTests
         // Arrange
         var reviewRepository = new FakeReviewRepository();
         var rentalRepository = new FakeRentalRepository();
+        var itemRepository = new FakeItemRepository();
 
         rentalRepository.Rentals.Add(new Rental
         {
@@ -22,21 +22,21 @@ public class ReviewServiceTests
             Status = "Completed"
         });
 
-        var service = new ReviewService(reviewRepository, rentalRepository);
+        var service = new ReviewService(reviewRepository, rentalRepository, itemRepository);
 
         // Act
         var review = await service.CreateReviewAsync(
             rentalId: 1,
             reviewerId: 200,
             rating: 5,
-            comment: "Great item, easy rental.");
+            comment: "Great item.");
 
         // Assert
         Assert.Equal(1, review.RentalId);
         Assert.Equal(10, review.ItemId);
         Assert.Equal(200, review.ReviewerId);
         Assert.Equal(5, review.Rating);
-        Assert.Equal("Great item, easy rental.", review.Comment);
+        Assert.Equal("Great item.", review.Comment);
         Assert.Single(reviewRepository.Reviews);
     }
 
@@ -46,6 +46,7 @@ public class ReviewServiceTests
         // Arrange
         var reviewRepository = new FakeReviewRepository();
         var rentalRepository = new FakeRentalRepository();
+        var itemRepository = new FakeItemRepository();
 
         rentalRepository.Rentals.Add(new Rental
         {
@@ -55,7 +56,7 @@ public class ReviewServiceTests
             Status = "Completed"
         });
 
-        var service = new ReviewService(reviewRepository, rentalRepository);
+        var service = new ReviewService(reviewRepository, rentalRepository, itemRepository);
 
         // Act
         var exception = await Assert.ThrowsAsync<Exception>(() =>
@@ -75,6 +76,7 @@ public class ReviewServiceTests
         // Arrange
         var reviewRepository = new FakeReviewRepository();
         var rentalRepository = new FakeRentalRepository();
+        var itemRepository = new FakeItemRepository();
 
         rentalRepository.Rentals.Add(new Rental
         {
@@ -84,7 +86,7 @@ public class ReviewServiceTests
             Status = "Completed"
         });
 
-        var service = new ReviewService(reviewRepository, rentalRepository);
+        var service = new ReviewService(reviewRepository, rentalRepository, itemRepository);
 
         // Act
         var exception = await Assert.ThrowsAsync<Exception>(() =>
@@ -104,6 +106,7 @@ public class ReviewServiceTests
         // Arrange
         var reviewRepository = new FakeReviewRepository();
         var rentalRepository = new FakeRentalRepository();
+        var itemRepository = new FakeItemRepository();
 
         rentalRepository.Rentals.Add(new Rental
         {
@@ -120,10 +123,10 @@ public class ReviewServiceTests
             ItemId = 10,
             ReviewerId = 200,
             Rating = 5,
-            Comment = "Existing review."
+            Comment = "Already reviewed."
         });
 
-        var service = new ReviewService(reviewRepository, rentalRepository);
+        var service = new ReviewService(reviewRepository, rentalRepository, itemRepository);
 
         // Act
         var exception = await Assert.ThrowsAsync<Exception>(() =>
@@ -143,6 +146,7 @@ public class ReviewServiceTests
         // Arrange
         var reviewRepository = new FakeReviewRepository();
         var rentalRepository = new FakeRentalRepository();
+        var itemRepository = new FakeItemRepository();
 
         rentalRepository.Rentals.Add(new Rental
         {
@@ -152,7 +156,7 @@ public class ReviewServiceTests
             Status = "Approved"
         });
 
-        var service = new ReviewService(reviewRepository, rentalRepository);
+        var service = new ReviewService(reviewRepository, rentalRepository, itemRepository);
 
         // Act
         var exception = await Assert.ThrowsAsync<Exception>(() =>
@@ -167,17 +171,18 @@ public class ReviewServiceTests
     }
 
     [Fact]
-    public async Task GetReviewsForItemAsync_ExistingReviews_ReturnsReviewsForItem()
+    public async Task GetReviewsForItemAsync_ValidItem_ReturnsReviewsForThatItem()
     {
         // Arrange
         var reviewRepository = new FakeReviewRepository();
         var rentalRepository = new FakeRentalRepository();
+        var itemRepository = new FakeItemRepository();
 
         reviewRepository.Reviews.Add(new Review
         {
             Id = 1,
-            RentalId = 1,
             ItemId = 10,
+            RentalId = 1,
             ReviewerId = 200,
             Rating = 5,
             Comment = "Review for item 10."
@@ -186,22 +191,182 @@ public class ReviewServiceTests
         reviewRepository.Reviews.Add(new Review
         {
             Id = 2,
+            ItemId = 99,
             RentalId = 2,
-            ItemId = 20,
-            ReviewerId = 300,
-            Rating = 4,
-            Comment = "Review for item 20."
+            ReviewerId = 201,
+            Rating = 3,
+            Comment = "Review for another item."
         });
 
-        var service = new ReviewService(reviewRepository, rentalRepository);
+        var service = new ReviewService(reviewRepository, rentalRepository, itemRepository);
 
         // Act
-        var reviews = await service.GetReviewsForItemAsync(itemId: 10);
+        var reviews = await service.GetReviewsForItemAsync(10);
 
         // Assert
         Assert.Single(reviews);
         Assert.Equal(10, reviews[0].ItemId);
         Assert.Equal("Review for item 10.", reviews[0].Comment);
+    }
+
+    [Fact]
+    public async Task GetAverageRatingForUserAsync_UserOwnsReviewedItems_ReturnsAverageRating()
+    {
+        // Arrange
+        var reviewRepository = new FakeReviewRepository();
+        var rentalRepository = new FakeRentalRepository();
+        var itemRepository = new FakeItemRepository();
+
+        itemRepository.Items.Add(new Item
+        {
+            Id = 10,
+            Title = "Drill",
+            OwnerId = 100
+        });
+
+        itemRepository.Items.Add(new Item
+        {
+            Id = 11,
+            Title = "Tent",
+            OwnerId = 100
+        });
+
+        itemRepository.Items.Add(new Item
+        {
+            Id = 99,
+            Title = "Different Owner Item",
+            OwnerId = 999
+        });
+
+        reviewRepository.Reviews.Add(new Review
+        {
+            Id = 1,
+            ItemId = 10,
+            RentalId = 1,
+            ReviewerId = 200,
+            Rating = 5,
+            Comment = "Great."
+        });
+
+        reviewRepository.Reviews.Add(new Review
+        {
+            Id = 2,
+            ItemId = 11,
+            RentalId = 2,
+            ReviewerId = 201,
+            Rating = 3,
+            Comment = "Okay."
+        });
+
+        reviewRepository.Reviews.Add(new Review
+        {
+            Id = 3,
+            ItemId = 99,
+            RentalId = 3,
+            ReviewerId = 202,
+            Rating = 1,
+            Comment = "Should not count for user 100."
+        });
+
+        var service = new ReviewService(reviewRepository, rentalRepository, itemRepository);
+
+        // Act
+        var averageRating = await service.GetAverageRatingForUserAsync(100);
+
+        // Assert
+        Assert.Equal(4.0, averageRating);
+    }
+
+    [Fact]
+    public async Task GetReviewCountForUserAsync_UserOwnsReviewedItems_ReturnsReviewCount()
+    {
+        // Arrange
+        var reviewRepository = new FakeReviewRepository();
+        var rentalRepository = new FakeRentalRepository();
+        var itemRepository = new FakeItemRepository();
+
+        itemRepository.Items.Add(new Item
+        {
+            Id = 10,
+            Title = "Drill",
+            OwnerId = 100
+        });
+
+        itemRepository.Items.Add(new Item
+        {
+            Id = 11,
+            Title = "Tent",
+            OwnerId = 100
+        });
+
+        itemRepository.Items.Add(new Item
+        {
+            Id = 99,
+            Title = "Different Owner Item",
+            OwnerId = 999
+        });
+
+        reviewRepository.Reviews.Add(new Review
+        {
+            Id = 1,
+            ItemId = 10,
+            RentalId = 1,
+            ReviewerId = 200,
+            Rating = 5,
+            Comment = "Great."
+        });
+
+        reviewRepository.Reviews.Add(new Review
+        {
+            Id = 2,
+            ItemId = 11,
+            RentalId = 2,
+            ReviewerId = 201,
+            Rating = 3,
+            Comment = "Okay."
+        });
+
+        reviewRepository.Reviews.Add(new Review
+        {
+            Id = 3,
+            ItemId = 99,
+            RentalId = 3,
+            ReviewerId = 202,
+            Rating = 1,
+            Comment = "Should not count for user 100."
+        });
+
+        var service = new ReviewService(reviewRepository, rentalRepository, itemRepository);
+
+        // Act
+        var reviewCount = await service.GetReviewCountForUserAsync(100);
+
+        // Assert
+        Assert.Equal(2, reviewCount);
+    }
+
+    [Fact]
+    public async Task GetAverageRatingForUserAsync_UserHasNoReviews_ReturnsZero()
+    {
+        // Arrange
+        var reviewRepository = new FakeReviewRepository();
+        var rentalRepository = new FakeRentalRepository();
+        var itemRepository = new FakeItemRepository();
+
+        itemRepository.Items.Add(new Item
+        {
+            Id = 10,
+            Title = "Drill",
+            OwnerId = 100
+        });
+
+        var service = new ReviewService(reviewRepository, rentalRepository, itemRepository);
+
+        // Act
+        var averageRating = await service.GetAverageRatingForUserAsync(100);
+
+        // Assert
+        Assert.Equal(0, averageRating);
     }
 
     private class FakeReviewRepository : IReviewRepository
@@ -326,9 +491,7 @@ public class ReviewServiceTests
             }
 
             existingRental.ItemId = rental.ItemId;
-            existingRental.Item = rental.Item;
             existingRental.BorrowerId = rental.BorrowerId;
-            existingRental.Borrower = rental.Borrower;
             existingRental.StartDate = rental.StartDate;
             existingRental.EndDate = rental.EndDate;
             existingRental.Status = rental.Status;
@@ -345,6 +508,77 @@ public class ReviewServiceTests
             if (rental != null)
             {
                 Rentals.Remove(rental);
+            }
+
+            return Task.CompletedTask;
+        }
+    }
+
+    private class FakeItemRepository : IItemRepository
+    {
+        public List<Item> Items { get; } = new();
+
+        public Task<List<Item>> GetAllAsync()
+        {
+            return Task.FromResult(Items);
+        }
+
+        public Task<Item?> GetByIdAsync(int id)
+        {
+            var item = Items.FirstOrDefault(i => i.Id == id);
+            return Task.FromResult(item);
+        }
+
+        public Task<List<Item>> GetByOwnerIdAsync(int ownerId)
+        {
+            var items = Items
+                .Where(i => i.OwnerId == ownerId)
+                .ToList();
+
+            return Task.FromResult(items);
+        }
+
+        public Task<List<Item>> GetNearbyAsync(double latitude, double longitude, double radiusKm)
+        {
+            return Task.FromResult(Items);
+        }
+
+        public Task<Item> CreateAsync(Item item)
+        {
+            item.Id = Items.Count + 1;
+            Items.Add(item);
+            return Task.FromResult(item);
+        }
+
+        public Task UpdateAsync(Item item)
+        {
+            var existingItem = Items.FirstOrDefault(i => i.Id == item.Id);
+
+            if (existingItem == null)
+            {
+                throw new Exception("Item not found.");
+            }
+
+            existingItem.Title = item.Title;
+            existingItem.Description = item.Description;
+            existingItem.DailyRate = item.DailyRate;
+            existingItem.Category = item.Category;
+            existingItem.LocationName = item.LocationName;
+            existingItem.Latitude = item.Latitude;
+            existingItem.Longitude = item.Longitude;
+            existingItem.OwnerId = item.OwnerId;
+            existingItem.UpdatedAt = item.UpdatedAt;
+
+            return Task.CompletedTask;
+        }
+
+        public Task DeleteAsync(int id)
+        {
+            var item = Items.FirstOrDefault(i => i.Id == id);
+
+            if (item != null)
+            {
+                Items.Remove(item);
             }
 
             return Task.CompletedTask;
