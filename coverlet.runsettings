@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<RunSettings>
+  <DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector friendlyName="XPlat Code Coverage">
+        <Configuration>
+          <Format>cobertura</Format>
+
+          <!-- Needed because RentalService and ReviewService are linked into the test assembly -->
+          <IncludeTestAssembly>true</IncludeTestAssembly>
+
+          <!-- Include everything in the test assembly first -->
+          <Include>[StarterApp.Test]*</Include>
+
+          <!-- Exclude actual test files, leaving linked service files to be measured -->
+          <ExcludeByFile>
+            **/*Tests.cs
+          </ExcludeByFile>
+
+          <ExcludeByAttribute>
+            Obsolete,
+            GeneratedCodeAttribute,
+            CompilerGeneratedAttribute
+          </ExcludeByAttribute>
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+</RunSettings>
