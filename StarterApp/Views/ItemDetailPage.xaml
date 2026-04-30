@@ -20,15 +20,15 @@
 
               <Label Text="{Binding Item.Category}" />
 
-              <Label Text="{Binding Item.DailyRate, StringFormat='£{0:F2} per day'}" /> <!-- Formats the price as pounds with 2 decimal places -->
+              <Label Text="{Binding Item.DailyRate, StringFormat='£{0:F2} per day'}" />
 
               <Label Text="{Binding Item.LocationName}" />
 
               <Button Text="Request Rental"
-                     Clicked="OnRequestRentalClicked" />
+                      Command="{Binding RequestRentalCommand}" />
 
               <Button Text="Edit Item"
-                     Clicked="OnEditItemClicked" />
+                      Command="{Binding EditItemCommand}" />
 
               <Label Text="{Binding StatusMessage}"
                      TextColor="Red" />

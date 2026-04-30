@@ -1,8 +1,10 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.DependencyInjection;
 using StarterApp.Database.Models;
 using StarterApp.Services;
+using StarterApp.Views;
 
 namespace StarterApp.ViewModels;
 
@@ -10,6 +12,8 @@ public partial class RentalsViewModel : ObservableObject
 {
     private readonly IRentalService _rentalService; // stores the rental service so the ViewModel can load rentals and apply rental workflow business rules
     private readonly IAuthenticationService _authService; // stores the auth service so the ViewModel can get the logged-in user's local database ID
+    private readonly StarterApp.Services.INavigationService _navigationService; // stores the navigation service so the ViewModel can navigate without page event handlers
+    private readonly IServiceProvider _serviceProvider; // stores the service provider so the ViewModel can open the review page through dependency injection
 
     [ObservableProperty]
     private ObservableCollection<RentalDisplayItem> outgoingRentals = new(); // stores the rental requests made by the current user, wrapped with button visibility rules
@@ -20,10 +24,16 @@ public partial class RentalsViewModel : ObservableObject
     [ObservableProperty]
     private string statusMessage = string.Empty; // used to show messages such as errors or "no rentals found"
 
-    public RentalsViewModel(IRentalService rentalService, IAuthenticationService authService)
+    public RentalsViewModel(
+        IRentalService rentalService,
+        IAuthenticationService authService,
+        StarterApp.Services.INavigationService navigationService,
+        IServiceProvider serviceProvider)
     {
         _rentalService = rentalService; // stores rentalService so it can be used through the whole class
         _authService = authService; // stores authService so the ViewModel can get the logged-in user's local database ID
+        _navigationService = navigationService; // stores navigationService so the ViewModel can open item detail pages
+        _serviceProvider = serviceProvider; // stores serviceProvider so the ViewModel can open the review page
     }
 
     [RelayCommand]
@@ -83,6 +93,46 @@ public partial class RentalsViewModel : ObservableObject
         catch (Exception ex)
         {
             StatusMessage = ex.InnerException?.Message ?? ex.Message; // stores the real error message so it can be shown on the page instead of crashing
+        }
+    }
+
+    [RelayCommand]
+    private async Task OpenIncomingRentalItemAsync(RentalDisplayItem? rentalDisplayItem)
+    {
+        if (rentalDisplayItem == null)
+            return;
+
+        var itemId = rentalDisplayItem.Rental.ItemId; // gets the item ID linked to the selected incoming rental
+
+        var parameters = new Dictionary<string, object>
+        {
+            { "itemId", itemId }
+        }; // passes the item ID to the item detail page
+
+        await _navigationService.NavigateToAsync("ItemDetailPage", parameters); // opens item details without using code-behind
+    }
+
+    [RelayCommand]
+    private async Task LeaveReviewAsync(RentalDisplayItem? rentalDisplayItem)
+    {
+        try
+        {
+            if (rentalDisplayItem == null)
+                return;
+
+            var selectedRental = rentalDisplayItem.Rental; // gets the actual rental from the display wrapper
+
+            var page = _serviceProvider.GetService<CreateReviewPage>(); // gets the review page from dependency injection
+
+            if (page?.BindingContext is CreateReviewViewModel reviewViewModel)
+            {
+                reviewViewModel.SetRentalDetails(selectedRental.Id, selectedRental.ItemId); // passes rental/item IDs into the review page
+                await Application.Current!.MainPage!.Navigation.PushAsync(page); // opens the review page
+            }
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = ex.InnerException?.Message ?? ex.Message; // shows the real error message instead of crashing
         }
     }
 

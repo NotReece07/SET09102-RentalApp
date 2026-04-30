@@ -30,7 +30,9 @@ public class NearbyItemsViewModelTests
         var mockLocationService = new MockLocationService(
             new AppLocation(55.9336, -3.2133)); // fake GPS location for the test
 
-        var viewModel = new NearbyItemsViewModel(itemRepository, mockLocationService);
+        var navigationService = new FakeNavigationService();
+
+        var viewModel = new NearbyItemsViewModel(itemRepository, mockLocationService, navigationService);
 
         // Act
         await viewModel.FindNearbyItemsCommand.ExecuteAsync(null);
@@ -47,8 +49,9 @@ public class NearbyItemsViewModelTests
         // Arrange
         var itemRepository = new FakeItemRepository();
         var mockLocationService = new MockLocationService(null); // simulates location permission denied or unavailable
+        var navigationService = new FakeNavigationService();
 
-        var viewModel = new NearbyItemsViewModel(itemRepository, mockLocationService);
+        var viewModel = new NearbyItemsViewModel(itemRepository, mockLocationService, navigationService);
 
         // Act
         await viewModel.FindNearbyItemsCommand.ExecuteAsync(null);
@@ -67,7 +70,9 @@ public class NearbyItemsViewModelTests
         var mockLocationService = new MockLocationService(
             new AppLocation(55.9336, -3.2133)); // fake GPS location for the test
 
-        var viewModel = new NearbyItemsViewModel(itemRepository, mockLocationService);
+        var navigationService = new FakeNavigationService();
+
+        var viewModel = new NearbyItemsViewModel(itemRepository, mockLocationService, navigationService);
 
         // Act
         await viewModel.FindNearbyItemsCommand.ExecuteAsync(null);
@@ -99,7 +104,9 @@ public class NearbyItemsViewModelTests
         var mockLocationService = new MockLocationService(
             new AppLocation(55.9336, -3.2133)); // fake GPS location for the test
 
-        var viewModel = new NearbyItemsViewModel(itemRepository, mockLocationService)
+        var navigationService = new FakeNavigationService();
+
+        var viewModel = new NearbyItemsViewModel(itemRepository, mockLocationService, navigationService)
         {
             RadiusKm = 10
         };
@@ -110,6 +117,50 @@ public class NearbyItemsViewModelTests
         // Assert
         Assert.Equal(10, itemRepository.LastRadiusKm);
         Assert.Equal("Found 1 item(s) within 10km.", viewModel.StatusMessage);
+    }
+
+    [Fact]
+    public async Task OpenItemCommand_WhenItemIsSelected_NavigatesToItemDetailPage()
+    {
+        // Arrange
+        var itemRepository = new FakeItemRepository();
+        var mockLocationService = new MockLocationService(new AppLocation(55.9336, -3.2133)); // fake GPS location for the test
+        var navigationService = new FakeNavigationService();
+
+        var viewModel = new NearbyItemsViewModel(itemRepository, mockLocationService, navigationService);
+
+        var selectedItem = new Item
+        {
+            Id = 5,
+            Title = "Navigation Test Item",
+            OwnerId = 1
+        };
+
+        // Act
+        await viewModel.OpenItemCommand.ExecuteAsync(selectedItem);
+
+        // Assert
+        Assert.Equal("ItemDetailPage", navigationService.LastRoute);
+        Assert.NotNull(navigationService.LastParameters);
+        Assert.Equal(5, navigationService.LastParameters["itemId"]);
+    }
+
+    [Fact]
+    public async Task OpenItemCommand_WhenNullIsSelected_DoesNotNavigate()
+    {
+        // Arrange
+        var itemRepository = new FakeItemRepository();
+        var mockLocationService = new MockLocationService(new AppLocation(55.9336, -3.2133)); // fake GPS location for the test
+        var navigationService = new FakeNavigationService();
+
+        var viewModel = new NearbyItemsViewModel(itemRepository, mockLocationService, navigationService);
+
+        // Act
+        await viewModel.OpenItemCommand.ExecuteAsync(null);
+
+        // Assert
+        Assert.Null(navigationService.LastRoute);
+        Assert.Null(navigationService.LastParameters);
     }
 
     private class FakeItemRepository : IItemRepository
@@ -187,6 +238,40 @@ public class NearbyItemsViewModelTests
                 Items.Remove(item);
             }
 
+            return Task.CompletedTask;
+        }
+    }
+
+    private class FakeNavigationService : INavigationService
+    {
+        public string? LastRoute { get; private set; } // stores the last route used during the test
+        public Dictionary<string, object>? LastParameters { get; private set; } // stores the last navigation parameters used during the test
+
+        public Task NavigateToAsync(string route)
+        {
+            LastRoute = route; // stores the route so the test can check it
+            return Task.CompletedTask;
+        }
+
+        public Task NavigateToAsync(string route, Dictionary<string, object> parameters)
+        {
+            LastRoute = route; // stores the route so the test can check it
+            LastParameters = parameters; // stores the parameters so the test can check the item ID
+            return Task.CompletedTask;
+        }
+
+        public Task NavigateBackAsync()
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task NavigateToRootAsync()
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task PopToRootAsync()
+        {
             return Task.CompletedTask;
         }
     }

@@ -16,9 +16,11 @@
                            Margin="0,5"
                            BorderColor="LightGray"
                            BackgroundColor="White">
-                           <!-- Below code makes the entire card responsible for handling the tap directly -->
+
                         <Frame.GestureRecognizers>
-                            <TapGestureRecognizer Tapped="OnItemTapped" />
+                            <TapGestureRecognizer
+                                Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.OpenItemCommand}"
+                                CommandParameter="{Binding .}" />
                         </Frame.GestureRecognizers>
 
                         <VerticalStackLayout Spacing="5"

@@ -1,5 +1,6 @@
 using StarterApp.Database.Data.Repositories;
 using StarterApp.Database.Models;
+using StarterApp.Services;
 using StarterApp.ViewModels;
 
 namespace StarterApp.Test.ViewModels;
@@ -11,6 +12,7 @@ public class ItemsListViewModelTests
     {
         // Arrange
         var itemRepository = new FakeItemRepository();
+        var navigationService = new FakeNavigationService();
 
         itemRepository.Items.Add(new Item
         {
@@ -34,7 +36,7 @@ public class ItemsListViewModelTests
             OwnerId = 1
         });
 
-        var viewModel = new ItemsListViewModel(itemRepository);
+        var viewModel = new ItemsListViewModel(itemRepository, navigationService);
 
         // Act
         await viewModel.LoadItemsCommand.ExecuteAsync(null);
@@ -50,7 +52,8 @@ public class ItemsListViewModelTests
     {
         // Arrange
         var itemRepository = new FakeItemRepository();
-        var viewModel = new ItemsListViewModel(itemRepository);
+        var navigationService = new FakeNavigationService();
+        var viewModel = new ItemsListViewModel(itemRepository, navigationService);
 
         var item = new Item
         {
@@ -76,13 +79,56 @@ public class ItemsListViewModelTests
     {
         // Arrange
         var itemRepository = new FakeItemRepository();
-        var viewModel = new ItemsListViewModel(itemRepository);
+        var navigationService = new FakeNavigationService();
+        var viewModel = new ItemsListViewModel(itemRepository, navigationService);
 
         // Act
         viewModel.SelectItemCommand.Execute(null);
 
         // Assert
         Assert.Null(viewModel.SelectedItem);
+    }
+
+    [Fact]
+    public async Task OpenItemCommand_WhenItemIsSelected_NavigatesToItemDetailPage()
+    {
+        // Arrange
+        var itemRepository = new FakeItemRepository();
+        var navigationService = new FakeNavigationService();
+        var viewModel = new ItemsListViewModel(itemRepository, navigationService);
+
+        var item = new Item
+        {
+            Id = 7,
+            Title = "Navigation Test Item",
+            OwnerId = 1
+        };
+
+        // Act
+        await viewModel.OpenItemCommand.ExecuteAsync(item);
+
+        // Assert
+        Assert.Equal(item, viewModel.SelectedItem);
+        Assert.Equal("ItemDetailPage", navigationService.LastRoute);
+        Assert.NotNull(navigationService.LastParameters);
+        Assert.Equal(7, navigationService.LastParameters["itemId"]);
+    }
+
+    [Fact]
+    public async Task OpenItemCommand_WhenNullIsPassed_DoesNotNavigate()
+    {
+        // Arrange
+        var itemRepository = new FakeItemRepository();
+        var navigationService = new FakeNavigationService();
+        var viewModel = new ItemsListViewModel(itemRepository, navigationService);
+
+        // Act
+        await viewModel.OpenItemCommand.ExecuteAsync(null);
+
+        // Assert
+        Assert.Null(viewModel.SelectedItem);
+        Assert.Null(navigationService.LastRoute);
+        Assert.Null(navigationService.LastParameters);
     }
 
     private class FakeItemRepository : IItemRepository
@@ -152,6 +198,40 @@ public class ItemsListViewModelTests
                 Items.Remove(item);
             }
 
+            return Task.CompletedTask;
+        }
+    }
+
+    private class FakeNavigationService : StarterApp.Services.INavigationService
+    {
+        public string? LastRoute { get; private set; } // stores the last route used during the test
+        public Dictionary<string, object>? LastParameters { get; private set; } // stores the last navigation parameters used during the test
+
+        public Task NavigateToAsync(string route)
+        {
+            LastRoute = route;
+            return Task.CompletedTask;
+        }
+
+        public Task NavigateToAsync(string route, Dictionary<string, object> parameters)
+        {
+            LastRoute = route;
+            LastParameters = parameters;
+            return Task.CompletedTask;
+        }
+
+        public Task NavigateBackAsync()
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task NavigateToRootAsync()
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task PopToRootAsync()
+        {
             return Task.CompletedTask;
         }
     }

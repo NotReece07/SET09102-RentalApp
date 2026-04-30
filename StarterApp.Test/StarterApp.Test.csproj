@@ -34,6 +34,7 @@
   <Compile Include="../StarterApp/ViewModels/ItemsListViewModel.cs" Link="LinkedViewModels/ItemsListViewModel.cs" />
   <Compile Include="../StarterApp/ViewModels/NearbyItemsViewModel.cs" Link="LinkedViewModels/NearbyItemsViewModel.cs" />
   <Compile Include="../StarterApp/Services/ILocationService.cs" Link="LinkedServices/ILocationService.cs" />
+  <Compile Include="../StarterApp/Services/INavigationService.cs" Link="LinkedServices/INavigationService.cs" />
 </ItemGroup>
 
 </Project>

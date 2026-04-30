@@ -11,6 +11,7 @@ public partial class NearbyItemsViewModel : ObservableObject
 {
     private readonly IItemRepository _itemRepository; // stores the item repository so nearby items can be loaded from the database
     private readonly ILocationService _locationService; // stores the location service so the ViewModel can ask for the user's current GPS location
+    private readonly INavigationService _navigationService; // stores the navigation service so item taps can navigate through a command instead of code-behind
 
     [ObservableProperty]
     private ObservableCollection<Item> nearbyItems = new(); // stores items found within the selected radius
@@ -21,10 +22,11 @@ public partial class NearbyItemsViewModel : ObservableObject
     [ObservableProperty]
     private string statusMessage = string.Empty; // used to show success or error messages on the page
 
-    public NearbyItemsViewModel(IItemRepository itemRepository, ILocationService locationService)
+    public NearbyItemsViewModel(IItemRepository itemRepository, ILocationService locationService, INavigationService navigationService)
     {
         _itemRepository = itemRepository; // stores itemRepository so it can be used through the whole class
         _locationService = locationService; // stores locationService so it can be used through the whole class
+        _navigationService = navigationService; // stores navigationService so the ViewModel can open the item detail page
     }
 
     [RelayCommand] // Turns the method below into a command the UI can bind to
@@ -63,5 +65,21 @@ public partial class NearbyItemsViewModel : ObservableObject
         {
             StatusMessage = ex.InnerException?.Message ?? ex.Message; // shows the real error message instead of crashing
         }
+    }
+
+    [RelayCommand] // Turns the method below into a command that opens the selected nearby item
+    private async Task OpenItemAsync(Item? selectedItem)
+    {
+        if (selectedItem == null)
+        {
+            return; // stops if no item was selected
+        }
+
+        var parameters = new Dictionary<string, object>
+        {
+            { "itemId", selectedItem.Id }
+        }; // passes the selected item ID to the item detail page
+
+        await _navigationService.NavigateToAsync("ItemDetailPage", parameters); // opens the item detail page using Shell navigation
     }
 }
