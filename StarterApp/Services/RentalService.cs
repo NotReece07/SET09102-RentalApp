@@ -3,6 +3,16 @@ using StarterApp.Database.Models;
 
 namespace StarterApp.Services;
 
+// This service works as a simple rental state machine.
+// It controls which rental status transitions are allowed and blocks invalid transitions.
+// Valid workflow:
+// Requested -> Approved or Rejected
+// Approved -> Out For Rent
+// Out For Rent -> Returned
+// Returned -> Completed
+// This is not a full formal State Pattern with separate RequestedState/ApprovedState classes,
+// but it applies the same idea by centralising state transition rules in one service layer.
+
 public class RentalService : IRentalService
 {
     private readonly IRentalRepository _rentalRepository; // stores the rental repository so this service can load and save rentals
