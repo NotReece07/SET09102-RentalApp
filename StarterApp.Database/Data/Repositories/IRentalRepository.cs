@@ -2,13 +2,9 @@ using StarterApp.Database.Models;
 
 namespace StarterApp.Database.Data.Repositories;
 
-public interface IRentalRepository
+// IRentalRepository inherits the shared IRepository<Rental> methods and adds rental-specific queries
+public interface IRentalRepository : IRepository<Rental>
 {
-    Task<List<Rental>> GetAllAsync(); // get all rental records
-    Task<Rental?> GetByIdAsync(int id); // get one rental by its ID
-    Task<List<Rental>> GetByBorrowerIdAsync(int borrowerId); // get all rentals made by one user
-    Task<List<Rental>> GetByItemIdAsync(int itemId); // get all rentals for one item id
-    Task<Rental> CreateAsync(Rental rental); // create a new rental request
-    Task UpdateAsync(Rental rental); // update a rental record
-    Task DeleteAsync(int id); // delete a rental record
+    Task<List<Rental>> GetByBorrowerIdAsync(int borrowerId); // gets rentals requested by one borrower
+    Task<List<Rental>> GetByItemIdAsync(int itemId); // gets rentals linked to one item
 }

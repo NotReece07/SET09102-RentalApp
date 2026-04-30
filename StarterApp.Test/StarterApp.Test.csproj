@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageReference Include="coverlet.collector" Version="6.0.4" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageReference Include="xunit" Version="2.9.3" />
@@ -27,6 +28,12 @@
   <Compile Include="../StarterApp/Services/RentalService.cs" Link="Services/RentalService.cs" />
   <Compile Include="../StarterApp/Services/IReviewService.cs" Link="Services/IReviewService.cs" />
   <Compile Include="../StarterApp/Services/ReviewService.cs" Link="Services/ReviewService.cs" />
+</ItemGroup>
+
+<ItemGroup>
+  <Compile Include="../StarterApp/ViewModels/ItemsListViewModel.cs" Link="LinkedViewModels/ItemsListViewModel.cs" />
+  <Compile Include="../StarterApp/ViewModels/NearbyItemsViewModel.cs" Link="LinkedViewModels/NearbyItemsViewModel.cs" />
+  <Compile Include="../StarterApp/Services/ILocationService.cs" Link="LinkedServices/ILocationService.cs" />
 </ItemGroup>
 
 </Project>

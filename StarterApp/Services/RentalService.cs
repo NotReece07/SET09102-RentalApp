@@ -41,7 +41,7 @@ public class RentalService : IRentalService
         var existingRentals = await _rentalRepository.GetByItemIdAsync(itemId); // loads existing rentals for this item
 
         var hasOverlap = existingRentals.Any(r =>
-            r.Status == "Approved" && // only approved rentals block the dates
+            IsBookingStatus(r.Status) && // approved/out-for-rent/returned/completed rentals block the dates
             startDate <= r.EndDate &&
             endDate >= r.StartDate);
 
@@ -74,19 +74,9 @@ public class RentalService : IRentalService
 
     public async Task ApproveRentalAsync(int rentalId, int currentOwnerId)
     {
-        var rental = await _rentalRepository.GetByIdAsync(rentalId); // loads the rental being approved
+        var rental = await LoadRentalWithItemAsync(rentalId); // loads the rental and checks it exists
 
-        if (rental == null)
-        {
-            throw new Exception("Rental not found."); // stops approval if rental does not exist
-        }
-
-        if (rental.Item == null)
-        {
-            throw new Exception("Rental item details could not be loaded."); // stops approval if related item data is missing
-        }
-
-        if (rental.Item.OwnerId != currentOwnerId)
+        if (rental.Item!.OwnerId != currentOwnerId)
         {
             throw new Exception("You can only approve rentals for your own items."); // blocks non-owners from approving rentals
         }
@@ -100,13 +90,13 @@ public class RentalService : IRentalService
 
         var hasOverlap = existingRentals.Any(r =>
             r.Id != rental.Id && // ignore the rental being approved
-            r.Status == "Approved" && // only approved rentals block the dates
+            IsBookingStatus(r.Status) && // active/confirmed rental states block the dates
             rental.StartDate <= r.EndDate &&
             rental.EndDate >= r.StartDate);
 
         if (hasOverlap)
         {
-            throw new Exception("This item is already booked for the selected dates."); // prevents approving a booking that overlaps an already approved one
+            throw new Exception("This item is already booked for the selected dates."); // prevents approving a booking that overlaps an existing booking
         }
 
         rental.Status = "Approved"; // updates the rental to approved
@@ -117,19 +107,9 @@ public class RentalService : IRentalService
 
     public async Task RejectRentalAsync(int rentalId, int currentOwnerId)
     {
-        var rental = await _rentalRepository.GetByIdAsync(rentalId); // loads the rental being rejected
+        var rental = await LoadRentalWithItemAsync(rentalId); // loads the rental and checks it exists
 
-        if (rental == null)
-        {
-            throw new Exception("Rental not found."); // stops rejection if rental does not exist
-        }
-
-        if (rental.Item == null)
-        {
-            throw new Exception("Rental item details could not be loaded."); // stops rejection if related item data is missing
-        }
-
-        if (rental.Item.OwnerId != currentOwnerId)
+        if (rental.Item!.OwnerId != currentOwnerId)
         {
             throw new Exception("You can only reject rentals for your own items."); // blocks non-owners from rejecting rentals
         }
@@ -145,23 +125,63 @@ public class RentalService : IRentalService
         await _rentalRepository.UpdateAsync(rental); // saves the rejection to the database
     }
 
-    public async Task CompleteRentalAsync(int rentalId, int currentBorrowerId)
+    public async Task MarkOutForRentAsync(int rentalId, int currentOwnerId)
     {
-        var rental = await _rentalRepository.GetByIdAsync(rentalId); // loads the rental being completed
+        var rental = await LoadRentalWithItemAsync(rentalId); // loads the rental and checks it exists
 
-        if (rental == null)
+        if (rental.Item!.OwnerId != currentOwnerId)
         {
-            throw new Exception("Rental not found."); // stops completion if rental does not exist
-        }
-
-        if (rental.BorrowerId != currentBorrowerId)
-        {
-            throw new Exception("You can only complete rentals that you requested."); // blocks other users from completing the rental
+            throw new Exception("You can only mark your own items as out for rent."); // blocks non-owners from moving the rental forward
         }
 
         if (rental.Status != "Approved")
         {
-            throw new Exception("Only approved rentals can be completed."); // only approved rentals can move to completed
+            throw new Exception("Only approved rentals can be marked as out for rent."); // approved moves to out for rent
+        }
+
+        rental.Status = "Out For Rent"; // updates the rental to out for rent
+        rental.UpdatedAt = DateTime.UtcNow;
+
+        await _rentalRepository.UpdateAsync(rental); // saves the status change to the database
+    }
+
+    public async Task MarkReturnedAsync(int rentalId, int currentBorrowerId)
+    {
+        var rental = await _rentalRepository.GetByIdAsync(rentalId); // loads the rental being returned
+
+        if (rental == null)
+        {
+            throw new Exception("Rental not found."); // stops if rental does not exist
+        }
+
+        if (rental.BorrowerId != currentBorrowerId)
+        {
+            throw new Exception("You can only return rentals that you requested."); // blocks other users from returning the rental
+        }
+
+        if (rental.Status != "Out For Rent")
+        {
+            throw new Exception("Only out for rent rentals can be marked as returned."); // out for rent moves to returned
+        }
+
+        rental.Status = "Returned"; // updates the rental to returned
+        rental.UpdatedAt = DateTime.UtcNow;
+
+        await _rentalRepository.UpdateAsync(rental); // saves the returned status to the database
+    }
+
+    public async Task CompleteRentalAsync(int rentalId, int currentOwnerId)
+    {
+        var rental = await LoadRentalWithItemAsync(rentalId); // loads the rental and checks it exists
+
+        if (rental.Item!.OwnerId != currentOwnerId)
+        {
+            throw new Exception("You can only complete rentals for your own items."); // blocks non-owners from completing the rental
+        }
+
+        if (rental.Status != "Returned")
+        {
+            throw new Exception("Only returned rentals can be completed."); // returned moves to completed
         }
 
         rental.Status = "Completed"; // updates the rental to completed
@@ -197,5 +217,30 @@ public class RentalService : IRentalService
         }
 
         return incomingRentals; // returns all incoming rentals for items owned by the current user
+    }
+
+    private static bool IsBookingStatus(string status)
+    {
+        return status == "Approved"
+            || status == "Out For Rent"
+            || status == "Returned"
+            || status == "Completed"; // these states block overlapping bookings
+    }
+
+    private async Task<Rental> LoadRentalWithItemAsync(int rentalId)
+    {
+        var rental = await _rentalRepository.GetByIdAsync(rentalId); // loads the rental
+
+        if (rental == null)
+        {
+            throw new Exception("Rental not found."); // stops if rental does not exist
+        }
+
+        if (rental.Item == null)
+        {
+            throw new Exception("Rental item details could not be loaded."); // stops if related item data is missing
+        }
+
+        return rental; // returns the valid rental with item details
     }
 }

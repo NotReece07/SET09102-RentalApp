@@ -89,6 +89,49 @@ public class RentalServiceTests
     }
 
     [Fact]
+    public async Task RequestRentalAsync_OverlappingApprovedRental_ThrowsException()
+    {
+        // Arrange
+        var itemRepository = new FakeItemRepository();
+        var rentalRepository = new FakeRentalRepository();
+
+        var item = new Item
+        {
+            Id = 1,
+            Title = "Power Drill",
+            DailyRate = 10.00m,
+            OwnerId = 100
+        };
+
+        itemRepository.Items.Add(item);
+
+        rentalRepository.Rentals.Add(new Rental
+        {
+            Id = 1,
+            ItemId = 1,
+            Item = item,
+            BorrowerId = 300,
+            StartDate = new DateOnly(2026, 4, 24),
+            EndDate = new DateOnly(2026, 4, 26),
+            Status = "Approved",
+            TotalPrice = 30.00m
+        });
+
+        var service = new RentalService(rentalRepository, itemRepository);
+
+        // Act
+        var exception = await Assert.ThrowsAsync<Exception>(() =>
+            service.RequestRentalAsync(
+                itemId: 1,
+                borrowerId: 200,
+                startDate: new DateOnly(2026, 4, 23),
+                endDate: new DateOnly(2026, 4, 25)));
+
+        // Assert
+        Assert.Equal("This item is already booked for the selected dates.", exception.Message);
+    }
+
+    [Fact]
     public async Task ApproveRentalAsync_RequestedRental_ChangesStatusToApproved()
     {
         // Arrange
@@ -217,7 +260,45 @@ public class RentalServiceTests
     }
 
     [Fact]
-    public async Task CompleteRentalAsync_ApprovedRental_ChangesStatusToCompleted()
+    public async Task RejectRentalAsync_RequestedRental_ChangesStatusToRejected()
+    {
+        // Arrange
+        var itemRepository = new FakeItemRepository();
+        var rentalRepository = new FakeRentalRepository();
+
+        var item = new Item
+        {
+            Id = 1,
+            Title = "Power Drill",
+            DailyRate = 10.00m,
+            OwnerId = 100
+        };
+
+        itemRepository.Items.Add(item);
+
+        rentalRepository.Rentals.Add(new Rental
+        {
+            Id = 1,
+            ItemId = 1,
+            Item = item,
+            BorrowerId = 200,
+            StartDate = new DateOnly(2026, 4, 23),
+            EndDate = new DateOnly(2026, 4, 25),
+            Status = "Requested",
+            TotalPrice = 30.00m
+        });
+
+        var service = new RentalService(rentalRepository, itemRepository);
+
+        // Act
+        await service.RejectRentalAsync(rentalId: 1, currentOwnerId: 100);
+
+        // Assert
+        Assert.Equal("Rejected", rentalRepository.Rentals[0].Status);
+    }
+
+    [Fact]
+    public async Task MarkOutForRentAsync_ApprovedRental_ChangesStatusToOutForRent()
     {
         // Arrange
         var itemRepository = new FakeItemRepository();
@@ -248,14 +329,14 @@ public class RentalServiceTests
         var service = new RentalService(rentalRepository, itemRepository);
 
         // Act
-        await service.CompleteRentalAsync(rentalId: 1, currentBorrowerId: 200);
+        await service.MarkOutForRentAsync(rentalId: 1, currentOwnerId: 100);
 
         // Assert
-        Assert.Equal("Completed", rentalRepository.Rentals[0].Status);
+        Assert.Equal("Out For Rent", rentalRepository.Rentals[0].Status);
     }
 
     [Fact]
-    public async Task CompleteRentalAsync_NotBorrower_ThrowsException()
+    public async Task MarkOutForRentAsync_NonOwner_ThrowsException()
     {
         // Arrange
         var itemRepository = new FakeItemRepository();
@@ -287,10 +368,203 @@ public class RentalServiceTests
 
         // Act
         var exception = await Assert.ThrowsAsync<Exception>(() =>
-            service.CompleteRentalAsync(rentalId: 1, currentBorrowerId: 999));
+            service.MarkOutForRentAsync(rentalId: 1, currentOwnerId: 999));
 
         // Assert
-        Assert.Equal("You can only complete rentals that you requested.", exception.Message);
+        Assert.Equal("You can only mark your own items as out for rent.", exception.Message);
+    }
+
+    [Fact]
+    public async Task MarkReturnedAsync_OutForRentRental_ChangesStatusToReturned()
+    {
+        // Arrange
+        var itemRepository = new FakeItemRepository();
+        var rentalRepository = new FakeRentalRepository();
+
+        var item = new Item
+        {
+            Id = 1,
+            Title = "Power Drill",
+            DailyRate = 10.00m,
+            OwnerId = 100
+        };
+
+        itemRepository.Items.Add(item);
+
+        rentalRepository.Rentals.Add(new Rental
+        {
+            Id = 1,
+            ItemId = 1,
+            Item = item,
+            BorrowerId = 200,
+            StartDate = new DateOnly(2026, 4, 23),
+            EndDate = new DateOnly(2026, 4, 25),
+            Status = "Out For Rent",
+            TotalPrice = 30.00m
+        });
+
+        var service = new RentalService(rentalRepository, itemRepository);
+
+        // Act
+        await service.MarkReturnedAsync(rentalId: 1, currentBorrowerId: 200);
+
+        // Assert
+        Assert.Equal("Returned", rentalRepository.Rentals[0].Status);
+    }
+
+    [Fact]
+    public async Task MarkReturnedAsync_NotBorrower_ThrowsException()
+    {
+        // Arrange
+        var itemRepository = new FakeItemRepository();
+        var rentalRepository = new FakeRentalRepository();
+
+        var item = new Item
+        {
+            Id = 1,
+            Title = "Power Drill",
+            DailyRate = 10.00m,
+            OwnerId = 100
+        };
+
+        itemRepository.Items.Add(item);
+
+        rentalRepository.Rentals.Add(new Rental
+        {
+            Id = 1,
+            ItemId = 1,
+            Item = item,
+            BorrowerId = 200,
+            StartDate = new DateOnly(2026, 4, 23),
+            EndDate = new DateOnly(2026, 4, 25),
+            Status = "Out For Rent",
+            TotalPrice = 30.00m
+        });
+
+        var service = new RentalService(rentalRepository, itemRepository);
+
+        // Act
+        var exception = await Assert.ThrowsAsync<Exception>(() =>
+            service.MarkReturnedAsync(rentalId: 1, currentBorrowerId: 999));
+
+        // Assert
+        Assert.Equal("You can only return rentals that you requested.", exception.Message);
+    }
+
+    [Fact]
+    public async Task CompleteRentalAsync_ReturnedRental_ChangesStatusToCompleted()
+    {
+        // Arrange
+        var itemRepository = new FakeItemRepository();
+        var rentalRepository = new FakeRentalRepository();
+
+        var item = new Item
+        {
+            Id = 1,
+            Title = "Power Drill",
+            DailyRate = 10.00m,
+            OwnerId = 100
+        };
+
+        itemRepository.Items.Add(item);
+
+        rentalRepository.Rentals.Add(new Rental
+        {
+            Id = 1,
+            ItemId = 1,
+            Item = item,
+            BorrowerId = 200,
+            StartDate = new DateOnly(2026, 4, 23),
+            EndDate = new DateOnly(2026, 4, 25),
+            Status = "Returned",
+            TotalPrice = 30.00m
+        });
+
+        var service = new RentalService(rentalRepository, itemRepository);
+
+        // Act
+        await service.CompleteRentalAsync(rentalId: 1, currentOwnerId: 100);
+
+        // Assert
+        Assert.Equal("Completed", rentalRepository.Rentals[0].Status);
+    }
+
+    [Fact]
+    public async Task CompleteRentalAsync_NonOwner_ThrowsException()
+    {
+        // Arrange
+        var itemRepository = new FakeItemRepository();
+        var rentalRepository = new FakeRentalRepository();
+
+        var item = new Item
+        {
+            Id = 1,
+            Title = "Power Drill",
+            DailyRate = 10.00m,
+            OwnerId = 100
+        };
+
+        itemRepository.Items.Add(item);
+
+        rentalRepository.Rentals.Add(new Rental
+        {
+            Id = 1,
+            ItemId = 1,
+            Item = item,
+            BorrowerId = 200,
+            StartDate = new DateOnly(2026, 4, 23),
+            EndDate = new DateOnly(2026, 4, 25),
+            Status = "Returned",
+            TotalPrice = 30.00m
+        });
+
+        var service = new RentalService(rentalRepository, itemRepository);
+
+        // Act
+        var exception = await Assert.ThrowsAsync<Exception>(() =>
+            service.CompleteRentalAsync(rentalId: 1, currentOwnerId: 999));
+
+        // Assert
+        Assert.Equal("You can only complete rentals for your own items.", exception.Message);
+    }
+
+    [Fact]
+    public async Task CompleteRentalAsync_NotReturned_ThrowsException()
+    {
+        // Arrange
+        var itemRepository = new FakeItemRepository();
+        var rentalRepository = new FakeRentalRepository();
+
+        var item = new Item
+        {
+            Id = 1,
+            Title = "Power Drill",
+            DailyRate = 10.00m,
+            OwnerId = 100
+        };
+
+        itemRepository.Items.Add(item);
+
+        rentalRepository.Rentals.Add(new Rental
+        {
+            Id = 1,
+            ItemId = 1,
+            Item = item,
+            BorrowerId = 200,
+            StartDate = new DateOnly(2026, 4, 23),
+            EndDate = new DateOnly(2026, 4, 25),
+            Status = "Approved",
+            TotalPrice = 30.00m
+        });
+
+        var service = new RentalService(rentalRepository, itemRepository);
+
+        // Act
+        var exception = await Assert.ThrowsAsync<Exception>(() =>
+            service.CompleteRentalAsync(rentalId: 1, currentOwnerId: 100));
+
+        // Assert
+        Assert.Equal("Only returned rentals can be completed.", exception.Message);
     }
 
     private class FakeRentalRepository : IRentalRepository

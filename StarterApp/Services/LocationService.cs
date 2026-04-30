@@ -4,7 +4,7 @@ namespace StarterApp.Services;
 
 public class LocationService : ILocationService
 {
-    public async Task<Location?> GetCurrentLocationAsync()
+    public async Task<AppLocation?> GetCurrentLocationAsync()
     {
         try
         {
@@ -12,7 +12,14 @@ public class LocationService : ILocationService
                 GeolocationAccuracy.Medium,
                 TimeSpan.FromSeconds(10)); // asks the device for a reasonably accurate location with a timeout
 
-            return await Geolocation.Default.GetLocationAsync(request); // returns the current device location if available
+            var location = await Geolocation.Default.GetLocationAsync(request); // asks MAUI/Android for the current GPS location
+
+            if (location == null)
+            {
+                return null; // returns null if no location was found
+            }
+
+            return new AppLocation(location.Latitude, location.Longitude); // converts the MAUI location into our own simple app location
         }
         catch
         {

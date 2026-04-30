@@ -42,9 +42,9 @@
                                 <HorizontalStackLayout Spacing="10"
                                                        Margin="0,10,0,0">
 
-                                    <Button Text="Complete"
-                                            IsVisible="{Binding CanComplete}"
-                                            Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.CompleteRentalCommand}"
+                                    <Button Text="Mark Returned"
+                                            IsVisible="{Binding CanMarkReturned}"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.MarkReturnedCommand}"
                                             CommandParameter="{Binding .}" />
 
                                     <Button Text="Leave Review"
@@ -111,6 +111,17 @@
                                             CommandParameter="{Binding .}" />
 
                                 </HorizontalStackLayout>
+
+                                <Button Text="Mark Out For Rent"
+                                        IsVisible="{Binding CanMarkOutForRent}"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.MarkOutForRentCommand}"
+                                        CommandParameter="{Binding .}" />
+
+                                <Button Text="Complete Rental"
+                                        IsVisible="{Binding CanComplete}"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.CompleteRentalCommand}"
+                                        CommandParameter="{Binding .}" />
+
                             </VerticalStackLayout>
                         </Border>
                     </DataTemplate>
