@@ -1,6 +1,6 @@
 namespace StarterApp.Database.Data.Repositories;
 
-public interface IRepository<T> where T : class
+public interface IRepository<T> where T : class //T= "some type", basically means "use whatever model type is given here
 {
     Task<List<T>> GetAllAsync(); // gets all records of this type
     Task<T?> GetByIdAsync(int id); // gets one record by ID, or null if it does not exist
