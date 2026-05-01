@@ -565,7 +565,7 @@ Some Tier 3 concepts are partially included:
 - Rental workflow validation behaves like a simple state machine
 - The nearby item search includes an adjustable radius slider
 
-Full Tier 3 implementations were not completed due to time constraints and the priority of delivering a stable, tested Tier 1 and Tier 2 application.
+Full Tier 3 implementations were not completed due to time constraints, lots of work due for other modules and the priority of delivering a stable, tested Tier 1 and Tier 2 application.
 
 Teir 3 features that are not implemented:
 
